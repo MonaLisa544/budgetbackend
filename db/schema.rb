@@ -12,24 +12,24 @@
 
 ActiveRecord::Schema[7.0].define(version: 2024_06_03_174230) do
   create_table "categories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "name"
+    t.string "name", default: ""
     t.boolean "delete_flag", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "transations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.integer "transation_amount"
+  create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "transaction_amount", default: 0
     t.datetime "transaction_date"
-    t.boolean "transaction_type"
-    t.string "description"
-    t.boolean "frequency"
-    t.boolean "delete_flag"
+    t.boolean "transaction_type", default: false
+    t.string "description", default: ""
+    t.boolean "frequency", default: false
+    t.boolean "delete_flag", default: false
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["category_id"], name: "index_transations_on_category_id"
+    t.index ["category_id"], name: "index_transactions_on_category_id"
   end
 
-  add_foreign_key "transations", "categories"
+  add_foreign_key "transactions", "categories"
 end
