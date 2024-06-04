@@ -1,6 +1,7 @@
 # app/models/category.rb
 
 class Category < ApplicationRecord
+  has_many :transactions
     # Validate presence of name attribute
   validates :name, presence: true
 

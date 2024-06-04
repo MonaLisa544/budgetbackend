@@ -1,5 +1,5 @@
 class TransactionSerializer
     include FastJsonapi::ObjectSerializer
-    attributes : transaction_amount, transaction_date, transaction_type, description, frequency, delete_flag
-    belongs_to :categories
+    attributes :transaction_amount, :transaction_date, :transaction_type, :description, :frequency, :delete_flag
+    belongs_to :category
 end

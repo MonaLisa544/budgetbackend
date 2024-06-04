@@ -12,7 +12,6 @@ CSV.foreach(csv_file, headers: true) do |row|
 
   Transaction.seed do |s|
     s.transaction_amount = row['transaction_amount']
-    s.transaction_type = row['transaction_type']
     s.description = row['description']
     s.category = category
   end
