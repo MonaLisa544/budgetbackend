@@ -23,7 +23,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_03_174230) do
     t.datetime "transaction_date"
     t.boolean "transaction_type", default: false
     t.string "description", default: ""
-    t.boolean "frequency", default:
+    t.boolean "frequency", default: false
     t.boolean "delete_flag", default: false
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
