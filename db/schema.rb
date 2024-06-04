@@ -10,13 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_03_174202) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_03_174230) do
   create_table "categories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
-    t.boolean "transaction_type"
     t.boolean "delete_flag", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
+  create_table "transations", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.integer "transation_amount"
+    t.datetime "transaction_date"
+    t.boolean "transaction_type"
+    t.string "description"
+    t.boolean "frequency"
+    t.boolean "delete_flag"
+    t.bigint "category_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category_id"], name: "index_transations_on_category_id"
+  end
+
+  add_foreign_key "transations", "categories"
 end
