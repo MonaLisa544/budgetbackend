@@ -17,6 +17,9 @@ gem "puma", ">= 5.0"
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "7.0.8"
 
+# Seed fu for maintain seed data
+gem 'seed-fu', '~> 2.3', '>= 2.3.9'
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
