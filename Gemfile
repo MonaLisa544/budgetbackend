@@ -8,6 +8,12 @@ gem "bootsnap", require: false
 # seriliazer format json
 gem "fast_jsonapi"
 
+#encodein and decoding
+gem 'jwt'
+
+#device
+gem 'devise'
+
 # sql
 gem 'mysql2'
 

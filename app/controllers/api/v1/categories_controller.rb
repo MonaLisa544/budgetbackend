@@ -1,12 +1,16 @@
 class Api::V1::CategoriesController < ApplicationController
     def index
-        @categories = Category.all
+        @categories = Category.where(delete_flag: false)
         render json: CategorySerializer.new(@categories).serialized_json
     end 
 
     def show
         @category = Category.find(params[:id])
-        render json: CategorySerializer.new(@category).serialized_json
+        if @category.delete_flag == false
+            render json: CategorySerializer.new(@category).serialized_json
+        else
+            render json: { errors: @category.errors }, status: 404
+        end
     end
 
     def new
@@ -30,16 +34,21 @@ class Api::V1::CategoriesController < ApplicationController
 
     def update 
         @category = Category.find(params[:id])
-        if @category.update(category_params)
-            render json: CategorySerializer.new(@category).serialized_json, status: 200
+        if @category.delete_flag == false
+            if @category.update(category_params)
+                render json: CategorySerializer.new(@category).serialized_json, status: 200
+            else
+                render json: { errors: @category.errors }, status: 422
+            end
         else
-            render json: { errors: @category.errors }, status: 422
+            render json: { errors: @category.errors }, status: 404
         end
+
     end
 
     def destroy
         @category = Category.find(params[:id])
-        @category.destroy
+        @category.update(delete_flag: true)
 
         render json: CategorySerializer.new(@category).serialized_json
     end

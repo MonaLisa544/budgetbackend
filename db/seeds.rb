@@ -10,19 +10,3 @@
 
 
 # db/seeds.rb
-
-puts "Seeding Categories..."
-
-categories = [
-  { name: "Electronics" },
-  { name: "Clothing" },
-  { name: "Books" },
-  { name: "Home Decor" }
-]
-
-categories.each do |category|
-  Category.find_or_create_by(category)
-  puts "Created category: #{category[:name]}"
-end
-
-puts "Seeding completed!"
