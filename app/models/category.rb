@@ -6,6 +6,6 @@ class Category < ApplicationRecord
   validates :name, presence: true
 
   # Validate delete_flag to be either true or false
-  validates :delete_flag, inclusion: { in: [true, false] }
+  attribute :delete_flag
 
 end
