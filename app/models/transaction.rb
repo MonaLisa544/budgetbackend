@@ -1,15 +1,14 @@
 class Transaction < ApplicationRecord 
 
     # belongs_to :user
-    belongs_to :category, dependent: :destroy
+    belongs_to :category # dependent: :destroy
 
     validates :transaction_amount, presence: true
-    validates :transation_date, presence: true
-    validates :transaction_type, presence: true
+    attribute :transaction_date
+    attribute :transaction_type
     validates :description, presence: true
-    validates :frequency, presence: true
-    validates :delete_flag, presence: true
-
+    attribute :frequency
+    attribute :delete_flag
 
     
 end                             

@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-    root "transactions#index"
+    root "api/v1/transactions#index"
     # Endpoint CRUD
 
     namespace :api do
