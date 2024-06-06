@@ -13,6 +13,7 @@ CSV.foreach(csv_file, headers: true) do |row|
 
   Category.seed do |s|
     s.name = row['name']
+    s.icon = row['icon']
     s.user = user
   end
 end

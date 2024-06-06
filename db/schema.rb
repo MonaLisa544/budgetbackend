@@ -12,8 +12,8 @@
 
 ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
   create_table "categories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "name"
-    t.string "icon"
+    t.string "name", default: ""
+    t.string "icon", default: ""
     t.boolean "delete_flag", default: false
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false

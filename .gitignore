@@ -37,3 +37,6 @@
 
 # Ignore database connection
 /config/database.yml
+
+# Ignore encrypted credentials file
+/config/credentials.yml.enc
