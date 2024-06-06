@@ -3,7 +3,7 @@ default: &default
   database: finance1
   encoding: utf8mb4
   username: root
-  password: password
+  password: Eni3d6pl#
   host: localhost
   port: 3306
 

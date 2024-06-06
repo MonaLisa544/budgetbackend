@@ -1,6 +1,6 @@
 class Transaction < ApplicationRecord 
 
-    # belongs_to :user
+    belongs_to :user
     belongs_to :category # dependent: :destroy
 
     validates :transaction_amount, presence: true

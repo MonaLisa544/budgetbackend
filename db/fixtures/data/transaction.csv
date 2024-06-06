@@ -1,4 +1,11 @@
-transaction_amount,description,category_name
-20000,Lunch,Food
-5000,Cola,Food
-10000,Bottle,Personal
+transaction_amount,description,category_name,user_id
+20000,Lunch,Food,1
+5000,Cola,Food,1
+10000,Bottle,Personal,1
+20000,Blalala,Food,2
+5000,Hahhaha,Food,2
+10000,Bottle,Personal,3
+2000,Undaaa,Personal,3
+30000,Hoool,Food,3
+10000,Chiher,Food,3
+
