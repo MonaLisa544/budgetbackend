@@ -57,7 +57,7 @@ class Api::V1::CategoriesController < ApplicationController
     private
     
         def category_params
-            params.require(:category).permit(:name, :delete_flag)
+            params.require(:category).permit(:name, :icon)
         end
 end
             

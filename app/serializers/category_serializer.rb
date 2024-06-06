@@ -1,5 +1,6 @@
 class CategorySerializer
     include FastJsonapi::ObjectSerializer
-    attributes :name, :delete_flag
+    attributes :name, :icon 
     has_many :transactions
+    belongs_to :user
 end
