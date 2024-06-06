@@ -12,10 +12,13 @@
 
 ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
   create_table "categories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.string "name", default: ""
+    t.string "name"
+    t.string "icon"
     t.boolean "delete_flag", default: false
+    t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_categories_on_user_id"
   end
 
   create_table "jwt_denylist", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -25,6 +28,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
   end
 
   create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "transaction_name", default: ""
     t.integer "transaction_amount", default: 0
     t.datetime "transaction_date"
     t.boolean "transaction_type", default: false
@@ -53,6 +57,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "categories", "users"
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "users"
 end
