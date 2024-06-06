@@ -1,4 +1,5 @@
 class Api::V1::CategoriesController < ApplicationController
+    before_action :authenticate_user!
     def index
         @categories = Category.where(delete_flag: false)
         render json: CategorySerializer.new(@categories).serialized_json
