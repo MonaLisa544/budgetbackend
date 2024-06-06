@@ -5,14 +5,23 @@ ruby "3.2.3"
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+#device
+gem 'devise'
+
+# jwt
+gem "devise-jwt"
+
+# dotenv for sensitive information
+gem 'dotenv-rails', groups: [:development, :test]
+
 # seriliazer format json
 gem "fast_jsonapi"
 
 #encodein and decoding
 gem 'jwt'
 
-#device
-gem 'devise'
+# middleware
+gem "rack-cors"
 
 # sql
 gem 'mysql2'

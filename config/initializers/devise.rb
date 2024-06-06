@@ -14,7 +14,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '772d3e23983359a4e127a50cdaee62f932f98060f4abe3e377889ebd4dae471df7304d5ed6611ce78666ca4c2523420fc5ed482adbc4b2e1746a23661ff32f8f'
+  # config.secret_key = '851d6d55c2ea207a728ed602f21df0e1c9f434505c241967a4a13a4c43d5902602c1fda440b5e58bdecfa399fe93e9e846fde83b56c90b8a5e5fce6e85605064'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -97,7 +97,9 @@ Devise.setup do |config|
   # Notice that if you are skipping storage for all authentication paths, you
   # may want to disable generating routes to Devise's sessions controller by
   # passing skip: :sessions to `devise_for` in your config/routes.rb
-  config.skip_session_storage = [:http_auth]
+  config.skip_session_storage = [:http_auth, :params_auth]
+
+  config.navigational_formats = []
 
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX
@@ -126,7 +128,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 12
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '21e276e41025185050731c18c2eb16ead7d26db020552a04c7110e7f7d9c06bd875fa095f9c4a2427b9cbd722358dbcedfe6d1f3ea6edac2a3cf704794c53073'
+  # config.pepper = 'a17ed480c1e3f80d63f692bff5b2c5cdd3d99d07ae86eafc4d56325d4d154723e86c8ae3126014fcb3a2c48664f2c5d914c1347cc17ecf76dcf250e457669c2d'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
@@ -310,4 +312,15 @@ Devise.setup do |config|
   # When set to false, does not sign a user in automatically after their password is
   # changed. Defaults to true, so a user is signed in automatically after changing a password.
   # config.sign_in_after_change_password = true
+
+  config.jwt do |jwt|
+    jwt.secret = ENV['DEVISE_JWT_SECRET_KEY']
+    jwt.dispatch_requests = [
+      ['POST', %r{^/sign_in$}]
+    ]
+    jwt.revocation_requests = [
+      ['DELETE', %r{^/sign_out$}]
+    ]
+    jwt.expiration_time = 15.day.to_i
+  end
 end
