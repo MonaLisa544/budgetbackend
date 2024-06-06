@@ -3,7 +3,7 @@ class Api::V1::TransactionsController < ApplicationController
     before_action :set_transaction, only: [:show, :update, :destroy]
 
     def index
-         transactions = Transaction.where(delete_flag: false)
+        transactions = Transaction.where(user_id: params[:user_id], delete_flag: false)
         render json: TransactionSerializer.new( transactions).serialized_json
     end
 
@@ -41,9 +41,10 @@ class Api::V1::TransactionsController < ApplicationController
     end
 
     def set_transaction
-         transaction = Transaction.find_by(id: params[:id], delete_flag: false)
+         transaction = Transaction.find_by(user_id: params[:user_id], id: params[:id], delete_flag: false)
         unless  transaction
             render json: { error: 'Transaction not found' }, status: 404
         end
     end
+
 end
