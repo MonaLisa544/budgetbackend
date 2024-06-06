@@ -5,7 +5,8 @@ class Users::SessionsController < Devise::SessionsController
   if resource
     # current_user is logged in successfully
     render json: {
-      user: current_user.as_json
+      # user: current_user.as_json,
+      token: request.env['warden-jwt_auth.token']
     }, status: 200
   else
     # current_user is not logged in successfully
