@@ -19,6 +19,7 @@ CSV.foreach(csv_file, headers: true) do |row|
   Transaction.seed do |s|
     s.transaction_name = row['transaction_name']
     s.transaction_amount = row['transaction_amount']
+    s.transaction_date = row['transaction_date']
     s.description = row['description']
     s.user = user
     s.category = category

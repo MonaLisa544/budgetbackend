@@ -1,13 +1,20 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
   private
-  def respond_with(resource, _opts = {})
-    resource.persisted? ? register_success : register_failed
+  def respond_with(user, _opts={})
+    if user.persisted?
+      render json: {
+        message: "Welcome #{user.firstName} #{user.lastName}!",
+      }, status: 200
+    else
+      render json: {
+        status: 400,
+        message: user.errors.full_messages
+      }, status: 400
+    end
   end
-  def register_success
-    render json: { message: 'Signed up.' }
-  end
-  def register_failed
-    render json: { message: "Signed up failure." }
+  
+  def sign_up_params
+    params.require(:user).permit(:lastName, :firstName, :email,  :password, :password_confirmation)
   end
 end

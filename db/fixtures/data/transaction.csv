@@ -1,11 +1,30 @@
-transaction_name,transaction_amount,description,category_name,user_id
-Lunch,20000,Lunch blalal,Food,1
-Food,5000,fjdklsjl,Food,1
-Bottle,10000,Bottle,Personal,1
-Chocolate,20000,Blalala,Food,2
-Water,5000,Hahhaha,Food,2
-Wine,10000,Bottle,Personal,3
-Cola,2000,Undaaa,Personal,3
-Dinner,30000,Hoool,Food,3
-Bonbon,10000,Chiher,Food,3
-
+transaction_name,transaction_amount,transaction_date,description,category_name,user_id
+Breakfast,20000,2024-06-01,Scrambled eggs and toast,Food,1
+Lunch,5000,2024-06-01,Chicken Caesar salad,Food,1
+Snack,10000,2024-06-01,Granola bar,Personal,1
+Dinner,20000,2024-06-02,Spaghetti with meatballs,Food,2
+Brunch,5000,2024-06-02,Avocado toast,Food,2
+Dessert,10000,2024-06-02,Chocolate cake,Personal,3
+Tea,2000,2024-06-02,Green tea,Personal,3
+Midnight Snack,30000,2024-06-03,Popcorn,Food,3
+Coffee,10000,2024-06-03,Iced coffee,Food,3
+Breakfast,20000,2024-06-03,Omelette with cheese,Food,4
+Lunch,5000,2024-06-03,Tuna sandwich,Food,4
+Snack,10000,2024-06-03,Fruit salad,Personal,4
+Dinner,20000,2024-06-04,Sushi platter,Food,5
+Brunch,5000,2024-06-04,Pancakes with syrup,Food,5
+Dessert,10000,2024-06-04,Apple pie,Personal,6
+Tea,2000,2024-06-04,Chai tea,Personal,6
+Midnight Snack,30000,2024-06-05,Chocolate chip cookies,Food,6
+Coffee,10000,2024-06-05,Cappuccino,Food,6
+Breakfast,20000,2024-06-05,Yogurt with granola,Food,7
+Lunch,5000,2024-06-05,Veggie wrap,Food,7
+Snack,10000,2024-06-05,Trail mix,Personal,7
+Dinner,20000,2024-06-06,Steak with mashed potatoes,Food,8
+Brunch,5000,2024-06-06,French toast,Food,8
+Dessert,10000,2024-06-06,Red velvet cake,Personal,9
+Tea,2000,2024-06-06,Earl Grey tea,Personal,9
+Midnight Snack,30000,2024-06-07,Donuts,Food,9
+Coffee,10000,2024-06-07,Espresso,Food,9
+Breakfast,20000,2024-06-07,Smoothie bowl,Food,9
+Lunch,5000,2024-06-07,Quinoa salad,Food,9
