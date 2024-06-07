@@ -5,8 +5,8 @@ class AddDeviseToUsers < ActiveRecord::Migration[7.0]
     create_table :users do |t|
       ## Database authenticatable
       t.string :lastName, null: false, default: ""
-      t.string :firstName, null: false, default: ""
-      t.string :email,              null: false, default: ""
+      t.string :firstName, null: false
+      t.string :email, null: false
       t.string :encrypted_password, null: false, default: ""
 
       t.timestamps
