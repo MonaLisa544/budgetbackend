@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
+ActiveRecord::Schema[7.0].define(version: 2024_06_07_101600) do
   create_table "categories", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", default: ""
     t.string "icon", default: ""
@@ -31,7 +31,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
     t.string "transaction_name", default: ""
     t.integer "transaction_amount", default: 0
     t.datetime "transaction_date"
-    t.boolean "transaction_type", default: false
+    t.string "transaction_type", default: "ex"
     t.string "description", default: ""
     t.boolean "frequency", default: false
     t.boolean "delete_flag", default: false
@@ -53,6 +53,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_06_141902) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
+    t.integer "role", default: 1
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
