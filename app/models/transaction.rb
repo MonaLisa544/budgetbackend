@@ -6,7 +6,7 @@ class Transaction < ApplicationRecord
     validates :transaction_name, presence: true
     validates :transaction_amount, presence: true
     attribute :transaction_date
-    attribute :transaction_type
+    enum :transaction_type, { Expences: 'ex', Income: 'in' }
     attribute :description
     attribute :frequency
     attribute :delete_flag
