@@ -31,7 +31,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_06_07_101600) do
   create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "transaction_name", default: ""
     t.integer "transaction_amount", default: 0
-    t.datetime "transaction_date"
+    t.date "transaction_date"
     t.string "description", default: ""
     t.boolean "frequency", default: false
     t.boolean "delete_flag", default: false

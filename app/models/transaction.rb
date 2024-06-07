@@ -1,4 +1,5 @@
 class Transaction < ApplicationRecord 
+    before_create :set_default_transaction_date
 
     belongs_to :user
     belongs_to :category # dependent: :destroy
@@ -9,6 +10,11 @@ class Transaction < ApplicationRecord
     attribute :description
     attribute :frequency
     attribute :delete_flag
+
+    private
+    def set_default_transaction_date
+        self.transaction_date ||= Date.today
+    end
 
     
 end                             
