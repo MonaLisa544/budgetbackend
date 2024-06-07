@@ -9,5 +9,6 @@ CSV.foreach(csv_file, headers: true) do |row|
     s.firstName = row['firstName']
     s.email = row['email']
     s.password = row['password']
+    s.password_confirmation = row['password_confirmation']
   end
 end
