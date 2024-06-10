@@ -13,7 +13,6 @@ Rails.application.routes.draw do
               collection do
                 get 'summary', to: "transactions#total_transactions"
                 get 'category', to: "transactions#category_transactions"
-
               end
             end
       end

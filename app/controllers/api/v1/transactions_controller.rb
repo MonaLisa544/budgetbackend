@@ -6,12 +6,12 @@ class Api::V1::TransactionsController < ApplicationController
   def index
     start_date = params[:start_date]
     end_date = params[:end_date]
-    @transactions = Transaction.where(transaction_date: start_date..end_date)
-    render json: TransactionSerializer.new(@transactions).serialized_json
+    transactions = @transactions.where(transaction_date: start_date..end_date)
+    render json: TransactionSerializer.new(transactions).serialized_json
   end
 
   def show
-    render json: TransactionSerializer.new(@transaction).serialized_json 
+    render json: TransactionSerializer.new(@transaction).serialized_json
   end
 
   def create
@@ -43,17 +43,17 @@ class Api::V1::TransactionsController < ApplicationController
     end_date = params[:end_date]
     type = params[:type]
 
-    @transactions = Transaction.left_joins(:category)
-                              .select('categories.transaction_type, categories.id as category_id, categories.name, SUM(transaction_amount) AS total_amount')
-                              .where(transaction_date: start_date..end_date)
+    transactions = @transactions.left_joins(:category)
+                                .select('categories.transaction_type, categories.id as category_id, categories.name, SUM(transaction_amount) AS total_amount')
+                                .where(transaction_date: start_date..end_date)
 
     if type.present?
-      @transactions = @transactions.where(categories: { transaction_type: type })
+      transactions = transactions.where(categories: { transaction_type: type })
     end
 
-    @transactions = @transactions.group(:transaction_type, :category_id)
+    transactions = transactions.group(:transaction_type, :category_id)
 
-    formatted_data = @transactions.group_by(&:transaction_type).transform_values do |type_transactions|
+    formatted_data = transactions.group_by(&:transaction_type).transform_values do |type_transactions|
       total = type_transactions.sum(&:total_amount)
       categories = type_transactions.map { |transaction| { "id" => transaction.category_id, "name" => transaction.name, "amount" => transaction.total_amount } }
       { "total" => total, "categories" => categories }
@@ -68,11 +68,9 @@ class Api::V1::TransactionsController < ApplicationController
     end_date = params[:end_date]
     category_id = params[:category_id]
 
-    @transactions = Transaction.where(transaction_date: start_date..end_date, category_id: category_id)
-    render json: TransactionSerializer.new(@transactions).serialized_json, status: 200
+    transactions = @transactions.where(transaction_date: start_date..end_date, category_id: category_id)
+    render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
-
-
 
   private
   def transaction_params
