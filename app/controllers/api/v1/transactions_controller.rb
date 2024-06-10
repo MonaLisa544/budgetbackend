@@ -4,11 +4,14 @@ class Api::V1::TransactionsController < ApplicationController
   before_action :set_transactions, only: [:index, :total_transactions, :category_transactions]
 
   def index
+    start_date = params[:start_date]
+    end_date = params[:end_date]
+    @transactions = Transaction.where(transaction_date: start_date..end_date)
     render json: TransactionSerializer.new(@transactions).serialized_json
   end
 
   def show
-    render json: TransactionSerializer.new(@transaction).serialized_json
+    render json: TransactionSerializer.new(@transaction).serialized_json 
   end
 
   def create
