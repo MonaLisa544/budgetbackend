@@ -1,10 +1,14 @@
 class Api::V1::CategoriesController < ApplicationController
     before_action :authenticate_user!
     before_action :set_category, only: [:show, :update, :destroy]
-    before_action :set_categories, only: [:index]
 
     # get all categories by transaction type
     def index
+        @categories = Category.where(user_id: current_user.id, delete_flag: false)
+        if @categories.empty?
+            render json: { error: "Categories not found" }, status: :not_found
+        end
+
         type = params[:type]
         categories = @categories.where(transaction_type: type)
         if type.present?
@@ -40,28 +44,14 @@ class Api::V1::CategoriesController < ApplicationController
     end
 
     private
-
         def category_params
             params.require(:category).permit(:name, :icon, :transaction_type)
         end
 
-        def log_current_user
-            puts "Current User: #{current_user.inspect}"
-        end
-
         def set_category
-            log_current_user
             @category = Category.where(user_id: current_user.id, id: params[:id], delete_flag: false)
             if @category.empty?
                 render json: { error: "Category not found" }, status: :not_found
-            end
-        end
-
-        def set_categories
-            log_current_user
-            @categories = Category.where(user_id: current_user.id, delete_flag: false)
-            if @categories.empty?
-                render json: { error: "Categories not found" }, status: :not_found
             end
         end
 end

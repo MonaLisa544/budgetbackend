@@ -78,22 +78,16 @@ class Api::V1::TransactionsController < ApplicationController
   end
 
   def set_transaction
-    log_current_user
     @transaction = Transaction.find_by(user_id: current_user.id, id: params[:id], delete_flag: false)
     render_not_found if @transaction.nil?
   end
 
   def set_transactions
-    log_current_user
     @transactions = Transaction.where(user_id: current_user.id, delete_flag: false)
     render_not_found if @transactions.empty?
   end
 
   def render_not_found
     render json: { error: 'Transaction not found' }, status: 404
-  end
-
-  def log_current_user
-    puts "Current User: #{current_user.inspect}"
   end
 end
