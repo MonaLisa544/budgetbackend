@@ -50,7 +50,7 @@ class Api::V1::TransactionsController < ApplicationController
                                 .group('categories.transaction_type', 'categories.id', 'categories.name')
 
     transactions = transactions.where(categories: { transaction_type: type }) if type.present?
-    paginated_transactions = transactions.paginate(page: params[:pg], per_page: 3)
+    paginated_transactions = transactions.paginate(page: params[:pg], per_page: 10)
 
     total_income = transactions.to_a.select { |t| t.transaction_type == 'in' }.sum(&:total_amount)
     total_expense = transactions.to_a.select { |t| t.transaction_type == 'ex' }.sum(&:total_amount)
