@@ -43,6 +43,7 @@ class Api::V1::TransactionsController < ApplicationController
     start_date = params[:start_date]
     end_date = params[:end_date]
     type = params[:type]
+    category_id = params[:category_id]
 
     transactions = @transactions.left_joins(:category)
                                 .select('categories.transaction_type, categories.id as category_id, categories.name, SUM(transaction_amount) AS total_amount')
@@ -50,6 +51,8 @@ class Api::V1::TransactionsController < ApplicationController
                                 .group('categories.transaction_type', 'categories.id', 'categories.name')
 
     transactions = transactions.where(categories: { transaction_type: type }) if type.present?
+    transactions = transactions.where(category_id: category_id) if category_id.present?
+
     paginated_transactions = transactions.paginate(page: params[:pg], per_page: 10)
 
     total_income = transactions.to_a.select { |t| t.transaction_type == 'in' }.sum(&:total_amount)
