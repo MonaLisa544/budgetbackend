@@ -7,6 +7,7 @@ class Api::V1::TransactionsController < ApplicationController
     start_date = params[:start_date]
     end_date = params[:end_date]
     transactions = @transactions.where(transaction_date: start_date..end_date)
+                                .paginate(page: params[:pg], per_page: 10)
     render json: TransactionSerializer.new(transactions).serialized_json
   end
 
@@ -46,21 +47,23 @@ class Api::V1::TransactionsController < ApplicationController
     transactions = @transactions.left_joins(:category)
                                 .select('categories.transaction_type, categories.id as category_id, categories.name, SUM(transaction_amount) AS total_amount')
                                 .where(transaction_date: start_date..end_date)
+                                .group('categories.transaction_type', 'categories.id', 'categories.name')
 
-    if type.present?
-      transactions = transactions.where(categories: { transaction_type: type })
-    end
+    transactions = transactions.where(categories: { transaction_type: type }) if type.present?
+    paginated_transactions = transactions.paginate(page: params[:pg], per_page: 3)
 
-    transactions = transactions.group(:transaction_type, :category_id)
+    total_income = transactions.to_a.select { |t| t.transaction_type == 'in' }.sum(&:total_amount)
+    total_expense = transactions.to_a.select { |t| t.transaction_type == 'ex' }.sum(&:total_amount)
 
-    formatted_data = transactions.group_by(&:transaction_type).transform_values do |type_transactions|
-      total = type_transactions.sum(&:total_amount)
+    formatted_data = paginated_transactions.group_by(&:transaction_type).transform_values do |type_transactions|
+      total = type_transactions.first.transaction_type == 'in' ? total_income : total_expense
       categories = type_transactions.map { |transaction| { "id" => transaction.category_id, "name" => transaction.name, "amount" => transaction.total_amount } }
-      { "total" => total, "categories" => categories }
+      { total: total, categories: categories }
     end
 
     render json: { data: formatted_data }, status: 200
   end
+
 
   # get only selected category's transactions
   def category_transactions
@@ -69,6 +72,7 @@ class Api::V1::TransactionsController < ApplicationController
     category_id = params[:category_id]
 
     transactions = @transactions.where(transaction_date: start_date..end_date, category_id: category_id)
+                                .paginate(page: params[:pg], per_page: 10)
     render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
 
