@@ -1,63 +1,67 @@
 class Api::V1::CategoriesController < ApplicationController
     before_action :authenticate_user!
-    def index
-        @categories = Category.where(delete_flag: false)
-        render json: CategorySerializer.new(@categories).serialized_json
-    end 
+    before_action :set_category, only: [:show, :update, :destroy]
+    before_action :set_categories, only: [:index]
 
-    def show
-        @category = Category.find(params[:id])
-        if @category.delete_flag == false
-            render json: CategorySerializer.new(@category).serialized_json
+    # get all categories by transaction type
+    def index
+        type = params[:type]
+        categories = @categories.where(transaction_type: type)
+        if type.present?
+            render json: CategorySerializer.new(categories).serialized_json
         else
-            render json: { errors: @category.errors }, status: 404
+            render json: CategorySerializer.new(@categories).serialized_json
         end
     end
 
-    def new
-        @category = Category.new
+    def show
         render json: CategorySerializer.new(@category).serialized_json
-    end 
+    end
 
     def create
-        @category = Category.new(category_params)
+        @category = current_user.categories.build(category_params)
         if @category.save
             render json: CategorySerializer.new(@category).serialized_json, status: 200
-        else 
+        else
             render json: { errors: @category.errors }, status: 422
         end
     end
 
-    def edit 
-        @category = Category.find(params[:id])
-        render json: @category
-    end
-
-    def update 
-        @category = Category.find(params[:id])
-        if @category.delete_flag == false
-            if @category.update(category_params)
-                render json: CategorySerializer.new(@category).serialized_json, status: 200
-            else
-                render json: { errors: @category.errors }, status: 422
-            end
+    def update
+        if @category.update(category_params)
+            render json: CategorySerializer.new(@category).serialized_json, status: 200
         else
-            render json: { errors: @category.errors }, status: 404
+            render json: { errors: @category.errors }, status: 422
         end
-
     end
 
     def destroy
-        @category = Category.find(params[:id])
-        @category.update(delete_flag: true)
-
         render json: CategorySerializer.new(@category).serialized_json
     end
 
     private
-    
+
         def category_params
             params.require(:category).permit(:name, :icon, :transaction_type)
         end
+
+        def log_current_user
+            puts "Current User: #{current_user.inspect}"
+        end
+
+        def set_category
+            log_current_user
+            @category = Category.where(user_id: current_user.id, id: params[:id], delete_flag: false)
+            if @category.empty?
+                render json: { error: "Category not found" }, status: :not_found
+            end
+        end
+
+        def set_categories
+            log_current_user
+            @categories = Category.where(user_id: current_user.id, delete_flag: false)
+            if @categories.empty?
+                render json: { error: "Categories not found" }, status: :not_found
+            end
+        end
 end
-            
