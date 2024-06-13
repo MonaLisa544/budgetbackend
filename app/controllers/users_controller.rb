@@ -6,7 +6,15 @@ class UsersController < ApplicationController
     user.profile_photo.attach(params[:user][:profile_photo]) if params[:user][:profile_photo]
 
     if update_user(user, user_params)
-      render json: { message: "Profile updated successfully" }, status: 200
+      render json: {
+        message: "Profile updated successfully",
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          profile_photo: user.profile_photo.attached? ? url_for(user.profile_photo) : nil
+        }
+      }, status: 200
     else
       render json: { errors: user.errors.full_messages }, status: 400
     end
@@ -14,13 +22,12 @@ class UsersController < ApplicationController
 
   def show
     user = current_user
-    if user.profile_photo.attached?
-      render json: user.as_json.merge( profile_photo: url_for(user.profile_photo))
-    else
-      render json: user.as_json.merge( profile_photo: nil)
-    end
-
-
+    render json: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profile_photo: user.profile_photo.attached? ? url_for(user.profile_photo) : nil
+    }
   end
 
   private
