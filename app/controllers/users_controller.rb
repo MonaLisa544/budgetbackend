@@ -14,10 +14,10 @@ class UsersController < ApplicationController
 
   def show
     user = current_user
-    if user.image.attached?
+    if user.profile_photo.attached?
       render json: user.as_json.merge( profile_photo: url_for(user.profile_photo))
     else
-      render json: user
+      render json: user.as_json.merge( profile_photo: nil)
     end
 
 
