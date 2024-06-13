@@ -40,7 +40,6 @@ class Api::V1::CategoriesController < ApplicationController
     end
 
     def destroy
-        @category.update(delete_flag: true)
         render json: CategorySerializer.new(@category).serialized_json
     end
 
