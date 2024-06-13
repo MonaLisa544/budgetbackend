@@ -4,9 +4,9 @@ class Category < ApplicationRecord
   has_many :transactions
   belongs_to :user
     # Validate presence of name attribute
-  validates :name, presence: true
+  validates :name, presence: true, uniqueness: true
   validates :icon, presence: true
-  enum :transaction_type, { Expences: 'ex', Income: 'in' }
+  enum :transaction_type, { expense: 'expense', income: 'income' }
 
   # Validate delete_flag to be either true or false
   attribute :delete_flag

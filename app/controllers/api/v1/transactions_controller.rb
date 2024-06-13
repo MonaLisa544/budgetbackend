@@ -3,10 +3,11 @@ class Api::V1::TransactionsController < ApplicationController
   before_action :set_transaction, only: [:show, :update, :destroy]
   before_action :set_transactions, only: [:index, :total_transactions, :category_transactions]
 
+  PER_PAGE = 10
+
   def index
-    start_date = params[:start_date]
-    end_date = params[:end_date]
-    transactions = @transactions.where(transaction_date: start_date..end_date)
+    transactions = @transactions.where(transaction_date: date_range)
+                                .paginate(page: page, per_page: per_page)
     render json: TransactionSerializer.new(transactions).serialized_json
   end
 
@@ -39,36 +40,42 @@ class Api::V1::TransactionsController < ApplicationController
 
   # get all transactions grouped by transaction type & category
   def total_transactions
-    start_date = params[:start_date]
-    end_date = params[:end_date]
     type = params[:type]
+    category_id = params[:category_id]
 
     transactions = @transactions.left_joins(:category)
                                 .select('categories.transaction_type, categories.id as category_id, categories.name, SUM(transaction_amount) AS total_amount')
-                                .where(transaction_date: start_date..end_date)
+                                .where(transaction_date: date_range)
+                                .group('categories.transaction_type', 'categories.id', 'categories.name')
 
-    if type.present?
-      transactions = transactions.where(categories: { transaction_type: type })
-    end
+    transactions = transactions.where(categories: { transaction_type: type }) if type.present?
+    transactions = transactions.where(category_id: category_id) if category_id.present?
 
-    transactions = transactions.group(:transaction_type, :category_id)
+    paginated_transactions = transactions.paginate(page: page, per_page: per_page)
 
-    formatted_data = transactions.group_by(&:transaction_type).transform_values do |type_transactions|
-      total = type_transactions.sum(&:total_amount)
-      categories = type_transactions.map { |transaction| { "id" => transaction.category_id, "name" => transaction.name, "amount" => transaction.total_amount } }
-      { "total" => total, "categories" => categories }
+    total_income = transactions.to_a.select { |t| t.transaction_type == 'income' }.sum(&:total_amount)
+    total_expense = transactions.to_a.select { |t| t.transaction_type == 'expense' }.sum(&:total_amount)
+
+    formatted_data = paginated_transactions.group_by(&:transaction_type).transform_values do |type_transactions|
+      total = type_transactions.first.transaction_type == 'in' ? total_income : total_expense
+      categories = type_transactions.map { |transaction|
+                                            { "id" => transaction.category_id,
+                                              "name" => transaction.name,
+                                              "amount" => transaction.total_amount }
+                                         }
+      { total: total, categories: categories }
     end
 
     render json: { data: formatted_data }, status: 200
   end
 
+
   # get only selected category's transactions
   def category_transactions
-    start_date = params[:start_date]
-    end_date = params[:end_date]
     category_id = params[:category_id]
 
-    transactions = @transactions.where(transaction_date: start_date..end_date, category_id: category_id)
+    transactions = @transactions.where(transaction_date: date_range, category_id: category_id)
+                                .paginate(page: page, per_page: per_page)
     render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
 
@@ -89,5 +96,17 @@ class Api::V1::TransactionsController < ApplicationController
 
   def render_not_found
     render json: { error: 'Transaction not found' }, status: 404
+  end
+
+  def per_page
+    params[:per_page]&.to_i || PER_PAGE
+  end
+
+  def page
+    params[:page]&.to_i
+  end
+
+  def date_range
+    params[:start_date]..params[:end_date]
   end
 end
