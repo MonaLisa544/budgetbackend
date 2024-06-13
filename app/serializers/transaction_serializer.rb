@@ -4,6 +4,9 @@ class TransactionSerializer
     attribute :category_name do |transaction|
         transaction.category.name
     end
+    attribute :transaction_type do |transaction|
+        transaction.category.transaction_type
+    end
     belongs_to :user
     belongs_to :category
 end

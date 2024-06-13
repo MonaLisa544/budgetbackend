@@ -1,5 +1,5 @@
 class Users::RegistrationsController < Devise::RegistrationsController
-  respond_to :json
+
   private
   def respond_with(user, _opts={})
     if user.persisted?
@@ -14,7 +14,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       }, status: 400
     end
   end
-  
+
   def sign_up_params
     params.require(:user).permit(:lastName, :firstName, :email,  :password, :password_confirmation)
   end

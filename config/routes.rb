@@ -9,7 +9,10 @@ Rails.application.routes.draw do
              controllers: {
                  sessions: 'users/sessions',
                  registrations: 'users/registrations'
-             }
+              }
+
+  get '/users/me', to: 'users#show'
+  put '/users/edit', to: 'users#update'
 
   namespace :api do
       namespace :v1 do
