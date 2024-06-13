@@ -1,6 +1,4 @@
 class PasswordResetsController < ApplicationController
-  def new
-  end
   # POST /password/reset
   def create
     user = User.find_by(email: params[:email])

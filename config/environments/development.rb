@@ -70,12 +70,12 @@ Rails.application.configure do
   # config.action_controller.raise_on_missing_callback_actions = true
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    address: 'smtp.gmail.com',
-    port: 587,
-    user_name: 'xongorzul54@gmail.com',
-    password: 'ocmgvfblcgebxfym',
-    authentication: 'plain',
-    enable_starttls_auto: true
+    address: ENV['SMTP_ADDRESS'],
+    port: ENV['SMTP_PORT'],
+    user_name: ENV['SMTP_USER_NAME'],
+    password: ENV['SMTP_PASSWORD'],
+    authentication: ENV['SMTP_AUTHENTICATION'],
+    enable_starttls_auto: ENV['SMTP_ENABLE_STARTTLS_AUTO'] == 'true'
   }
   config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
 end
