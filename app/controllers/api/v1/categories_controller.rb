@@ -6,7 +6,7 @@ class Api::V1::CategoriesController < ApplicationController
         @categories = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, 2).where(delete_flag: false)
         
         if @categories.empty?
-          render json: { error: "Categories not found" }, status: :404
+          render json: { error: "Categories not found" }, status: 404
           return
         end
         
