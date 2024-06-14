@@ -94,7 +94,6 @@ class Api::V1::TransactionsController < ApplicationController
                                          }
       { total: total, categories: categories }
     end
-
     render json: { data: formatted_data }, status: 200
   end
 
@@ -111,29 +110,28 @@ class Api::V1::TransactionsController < ApplicationController
   end
 
   private
+    def transaction_params
+      params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name)
+    end
 
-  def transaction_params
-    params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name)
-  end
+    def set_transaction
+      @transaction = Transaction.where(user_id: current_user.id, id: params[:id], delete_flag: false).first
+      render_not_found if @transaction.nil?
+    end
 
-  def set_transaction
-    @transaction = Transaction.where(user_id: current_user.id, id: params[:id], delete_flag: false).first
-    render_not_found if @transaction.nil?
-  end
+    def render_not_found
+      render json: { error: 'Transaction not found' }, status: 404
+    end
 
-  def render_not_found
-    render json: { error: 'Transaction not found' }, status: 404
-  end
+    def per_page
+      params[:per_page]&.to_i || PER_PAGE
+    end
 
-  def per_page
-    params[:per_page]&.to_i || PER_PAGE
-  end
+    def page
+      params[:page]&.to_i
+    end
 
-  def page
-    params[:page]&.to_i
-  end
-
-  def date_range
-    params[:start_date]..params[:end_date]
-  end
+    def date_range
+      params[:start_date]..params[:end_date]
+    end
 end
