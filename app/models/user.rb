@@ -5,6 +5,8 @@ class User < ApplicationRecord
          :omniauthable, omniauth_providers: %i[facebook],
          jwt_revocation_strategy: JwtDenylist
 
+  include RoleConstants
+
   has_many :transactions
   has_many :categories
   validates :lastName, presence: true
