@@ -1,6 +1,4 @@
 Rails.application.routes.draw do
-  root "transactions#index"
-
   devise_for :users,
              controllers: {
                  sessions: 'users/sessions',

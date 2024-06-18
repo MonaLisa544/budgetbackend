@@ -1,6 +1,8 @@
 source "https://rubygems.org"
 
 ruby "3.2.3"
+#
+gem 'activerecord-session_store'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
