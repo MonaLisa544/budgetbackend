@@ -51,7 +51,7 @@ class Api::V1::CategoriesController < ApplicationController
         @category.update(delete_flag: true)
 
         render json: CategorySerializer.new(@category).serialized_json
-      end
+    end
 
     private
         def category_params
