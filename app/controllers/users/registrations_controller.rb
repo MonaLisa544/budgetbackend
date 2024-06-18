@@ -6,6 +6,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       render json: {
         message: "Welcome #{user.firstName} #{user.lastName}!",
       }, status: 200
+      UserMailer.welcome_email(resource).deliver_now
     else
       render json: {
         status: 400,
