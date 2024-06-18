@@ -2,10 +2,8 @@ class Api::V1::CategoriesController < ApplicationController
     before_action :authenticate_user!
     before_action :set_category, only: [:show, :update, :destroy]
 
-    ADMIN = 2
-
     def index
-        @categories = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, ADMIN).where(delete_flag: false)
+        @categories = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, RoleConstants::ADMIN_ROLE).where(delete_flag: false)
 
         if @categories.empty?
           render json: { error: "Categories not found" }, status: 404
