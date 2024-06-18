@@ -68,11 +68,15 @@ class Api::V1::TransactionsController < ApplicationController
   def total_transactions
     transactions = Transaction.where(user_id: current_user.id, delete_flag: false)
     render_not_found if transactions.empty?
+    categories = Category.where(user_id: current_user.id, delete_flag: false)
+    serialized_categories = CategorySerializer.new(categories).serializable_hash
+
+    result = serialized_categories[:data].select { |category| category[:relationships][:transactions][:data].empty? }
 
     type = params[:type]
     category_id = params[:category_id]
 
-    transactions = @transactions.left_joins(:category)
+    filtered_transactions = transactions.left_joins(:category)
                                 .select('categories.transaction_type, categories.id as category_id, categories.name, categories.icon, SUM(transaction_amount) AS total_amount')
                                 .where(transaction_date: date_range)
                                 .group('categories.transaction_type', 'categories.id', 'categories.name')
@@ -90,9 +94,17 @@ class Api::V1::TransactionsController < ApplicationController
       categories = type_transactions.map { |transaction|
                                             { "id" => transaction.category_id,
                                               "name" => transaction.name,
-                                              "icon" => transaction.icon,
-                                              "amount" => transaction.total_amount }
+                                              "amount" => transaction.total_amount,
+                                              "icon" => transaction.icon }
                                          }
+      result.each do |category|
+        categories << {
+          "id" => category[:id],
+          "name" => category[:attributes][:name],
+          "amount" => 0,
+          "icon" => category[:attributes][:icon]
+        }
+      end if result.any?
       { total: total, categories: categories }
     end
     render json: { data: formatted_data }, status: 200

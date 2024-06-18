@@ -1,9 +1,4 @@
 Rails.application.routes.draw do
-  post '/password/reset', to: 'password_resets#create'    
-  get '/password/reset/edit', to: 'password_resets#edit'    
-  patch '/password/reset/edit', to: 'password_resets#update'
- 
-
   devise_for :users,
              controllers: {
                  sessions: 'users/sessions',
