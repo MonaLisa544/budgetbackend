@@ -50,7 +50,7 @@ class Api::V1::CategoriesController < ApplicationController
         transactions.update_all(category_id: category_other.id)
         @category.update(delete_flag: true)
 
-        render json: CategorySerializer.new(@category).serialized_json, status: :ok
+        render json: CategorySerializer.new(@category).serialized_json
       end
 
     private
