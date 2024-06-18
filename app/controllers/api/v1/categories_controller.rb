@@ -41,13 +41,15 @@ class Api::V1::CategoriesController < ApplicationController
     def destroy
         transactions = @category.transactions
 
-        category_other = Category.where(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type)
+        category_other = Category.find_by(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type)
+
         if category_other.nil?
-            category_other = Category.create(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
+          category_other = Category.create(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
         end
 
         transactions.update_all(category_id: category_other.id)
         @category.update(delete_flag: true)
+
         render json: CategorySerializer.new(@category).serialized_json
     end
 
