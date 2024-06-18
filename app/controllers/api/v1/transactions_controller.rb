@@ -72,7 +72,6 @@ class Api::V1::TransactionsController < ApplicationController
     serialized_categories = CategorySerializer.new(categories).serializable_hash
 
     result = serialized_categories[:data].select { |category| category[:relationships][:transactions][:data].empty? }
-    puts result
 
     type = params[:type]
     category_id = params[:category_id]
