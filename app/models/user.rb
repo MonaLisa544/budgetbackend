@@ -2,6 +2,7 @@ class User < ApplicationRecord
   devise :database_authenticatable,
          :jwt_authenticatable,
          :registerable,
+         :omniauthable, omniauth_providers: %i[facebook],
          jwt_revocation_strategy: JwtDenylist
 
   has_many :transactions
@@ -15,6 +16,13 @@ class User < ApplicationRecord
   has_one_attached :profile_photo
 
   attr_accessor :skip_password_validation
+
+  def self.from_omniauth(auth)
+    name_split = auth.info.name.split(" ")
+    user = User.where(email: auth.info.email).first
+    user ||= User.create!(provider: auth.provider, uid: auth.uid, lastName: name_split[0], firstName: name_split[1], email: auth.info.email, password: Devise.friendly_token[0, 20])
+      user
+  end
 
   private
     def password_required?
