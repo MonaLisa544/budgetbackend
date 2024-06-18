@@ -39,6 +39,14 @@ class Api::V1::CategoriesController < ApplicationController
     end
 
     def destroy
+        transactions = @category.transactions
+
+        category_other = Category.where(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type)
+        if category_other.nil?
+            category_other = Category.create(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
+        end
+
+        transactions.update_all(category_id: category_other.id)
         @category.update(delete_flag: true)
         render json: CategorySerializer.new(@category).serialized_json
     end
@@ -49,8 +57,8 @@ class Api::V1::CategoriesController < ApplicationController
         end
 
         def set_category
-            @category = Category.where(user_id: current_user.id, id: params[:id], delete_flag: false)
-            if @category.empty?
+            @category = Category.find_by(user_id: current_user.id, id: params[:id], delete_flag: false)
+            unless @category
                 render json: { error: "Category not found" }, status: :not_found
             end
         end
