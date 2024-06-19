@@ -18,22 +18,10 @@ class User < ApplicationRecord
 
   attr_accessor :skip_password_validation
 
-  # def self.form_omniauth(access_token)
-  #   user = User.where(email: access_token.info.email).first
-  #   unless user
-  #     user = User.create(
-  #       email: access_token.info.email,
-  #       password: Devise.friendly_token[0,20]
-  #     )
-  #   end
-  #   user.firstName = access_token.info.name
-  #   user.image = access_token.info.image
-  #   user.uid = access_token.uid
-  #   user.provider = access_token.provider
-  #   user.save
-
-  #   user
-  # end
+  def self.from_google(u)
+    create_with(uid: u[:uid], provider: 'google',
+                password: Devise.friendly_token[0, 20]).find_or_create_by!(email: u[:email])
+end
   private
     def password_required?
       return false if skip_password_validation
