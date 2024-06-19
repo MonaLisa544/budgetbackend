@@ -169,6 +169,9 @@ GEM
       hashie (>= 3.4.6)
       rack (>= 2.2.3)
       rack-protection
+    omniauth-facebook (10.0.0)
+      bigdecimal
+      omniauth-oauth2 (>= 1.2, < 3)
     omniauth-google-oauth2 (1.1.2)
       jwt (>= 2.0)
       oauth2 (~> 2.0)
@@ -179,12 +182,6 @@ GEM
       omniauth (~> 2.0)
     omniauth-rails_csrf_protection (1.0.2)
       actionpack (>= 4.2)
-      omniauth (~> 2.0)
-    omniauth-facebook (10.0.0)
-      bigdecimal
-      omniauth-oauth2 (>= 1.2, < 3)
-    omniauth-oauth2 (1.8.0)
-      oauth2 (>= 1.4, < 3)
       omniauth (~> 2.0)
     orm_adapter (0.5.0)
     psych (5.1.2)
@@ -280,9 +277,9 @@ DEPENDENCIES
   jwt
   mysql2
   omniauth
-  omniauth-google-oauth2
-  omniauth-rails_csrf_protection (~> 1.0)
   omniauth-facebook
+  omniauth-google-oauth2
+  omniauth-rails_csrf_protection
   puma (>= 5.0)
   rack-cors
   rails (= 7.0.8)
