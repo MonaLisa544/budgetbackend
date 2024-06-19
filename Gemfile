@@ -2,6 +2,9 @@ source "https://rubygems.org"
 
 ruby "3.2.3"
 
+# for photo upload
+gem 'base64'
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
