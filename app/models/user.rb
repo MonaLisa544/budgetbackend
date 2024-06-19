@@ -2,6 +2,8 @@ class User < ApplicationRecord
   devise :database_authenticatable,
          :jwt_authenticatable,
          :registerable,
+         :recoverable, :rememberable, :validatable, 
+         :omniauthable, omniauth_providers: [:google_oauth2],
          :omniauthable, omniauth_providers: %i[facebook],
          jwt_revocation_strategy: JwtDenylist
 
@@ -18,6 +20,11 @@ class User < ApplicationRecord
   has_one_attached :profile_photo
 
   attr_accessor :skip_password_validation
+
+  def self.from_google(u)
+    create_with(uid: u[:uid], provider: 'google',
+                password: Devise.friendly_token[0, 20]).find_or_create_by!(email: u[:email])
+end
 
   def self.from_omniauth(auth)
     name_split = auth.info.name.split(" ")

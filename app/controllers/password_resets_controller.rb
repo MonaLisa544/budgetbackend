@@ -5,7 +5,7 @@ class PasswordResetsController < ApplicationController
     if user
       token = user.signed_id(purpose: 'password_reset', expires_in: 15.minutes)
       PasswordMailer.with(user: user).reset.deliver_later
-      render json: { message: 'Password reset instructions sent to your email', reset_password_token: token }, status: :ok
+      render json: { message: 'Password reset instructions sent to your email', reset_password_token: token}, status: :ok
     else
       render json: { error: 'Email not found' }, status: :not_found
     end
