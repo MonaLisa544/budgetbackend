@@ -27,7 +27,7 @@ class User < ApplicationRecord
       password: Devise.friendly_token[0,20]
       )
     end 
-    user.name = access_token.info.name
+    user.firstName = access_token.info.name
     user.image = access_token.info.image
     user.uid = access_token.uid
     user.provider = access_token.provider
