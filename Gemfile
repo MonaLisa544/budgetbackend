@@ -8,6 +8,15 @@ gem "bootsnap", require: false
 #device
 gem 'devise'
 
+#google login
+gem 'omniauth-google-oauth2'
+
+#google
+gem 'omniauth'
+
+#
+gem 'omniauth-rails_csrf_protection','~> 1.0'
+
 # jwt
 gem "devise-jwt"
 
