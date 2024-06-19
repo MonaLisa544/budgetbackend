@@ -44,7 +44,8 @@ class Api::V1::CategoriesController < ApplicationController
         category_other = Category.find_by(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type)
 
         if category_other.nil?
-          category_other = Category.create(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
+            category_other = Category.new(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
+            category_other.save
         end
 
         transactions.update_all(category_id: category_other.id)
