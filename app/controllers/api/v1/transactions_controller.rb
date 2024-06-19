@@ -20,11 +20,12 @@ class Api::V1::TransactionsController < ApplicationController
   def create
     transaction_attributes = transaction_params.except(:category_name)
     category_name = transaction_params[:category_name]
+    type = transaction_params[:transaction_type]
 
     if category_name.present?
-      category = Category.find_by(name: category_name)
+      category = Category.find_by(name: category_name, transaction_type: type)
       if category.nil?
-        category = Category.create(name: category_name)
+        category = Category.create(name: category_name, transaction_type: type)
       end
       transaction_attributes[:category_id] = category.id
     end
@@ -124,7 +125,7 @@ class Api::V1::TransactionsController < ApplicationController
 
   private
     def transaction_params
-      params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name)
+      params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name, :transaction_type)
     end
 
     def set_transaction
