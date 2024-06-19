@@ -14,11 +14,8 @@ gem 'devise'
 #google login
 gem 'omniauth-google-oauth2'
 
-#google
-gem 'omniauth'
-
 #
-gem 'omniauth-rails_csrf_protection','~> 1.0'
+gem 'omniauth-rails_csrf_protection'
 
 # jwt
 gem "devise-jwt"

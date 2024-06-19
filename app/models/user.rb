@@ -3,8 +3,7 @@ class User < ApplicationRecord
          :jwt_authenticatable,
          :registerable,
          :recoverable, :rememberable, :validatable, 
-         :omniauthable, omniauth_providers: [:google_oauth2],
-         :omniauthable, omniauth_providers: %i[facebook],
+         :omniauthable, omniauth_providers: [:google_oauth2, :facebook],
          jwt_revocation_strategy: JwtDenylist
 
   include RoleConstants
@@ -21,16 +20,20 @@ class User < ApplicationRecord
 
   attr_accessor :skip_password_validation
 
-  def self.from_google(u)
-    create_with(uid: u[:uid], provider: 'google',
-                password: Devise.friendly_token[0, 20]).find_or_create_by!(email: u[:email])
-end
+  def self.from_omniauth(access_token)
+    user = User.where(email: access_token.info.email).first
+    unless user = User.create(
+      email: access_token.info.email,
+      password: Devise.friendly_token[0,20]
+      )
+    end 
+    user.name = access_token.info.name
+    user.image = access_token.info.image
+    user.uid = access_token.uid
+    user.provider = access_token.provider
+    user.save
 
-  def self.from_omniauth(auth)
-    name_split = auth.info.name.split(" ")
-    user = User.where(email: auth.info.email).first
-    user ||= User.create!(provider: auth.provider, uid: auth.uid, lastName: name_split[0], firstName: name_split[1], email: auth.info.email, password: Devise.friendly_token[0, 20])
-      user
+    user
   end
 
   private
@@ -39,3 +42,15 @@ end
       new_record? || password.present? || password_confirmation.present?
     end
 end
+
+# def self.from_google(u)
+#   create_with(uid: u[:uid], provider: 'google',
+#               password: Devise.friendly_token[0, 20]).find_or_create_by!(email: u[:email])
+# end
+
+# def self.from_omniauth(auth)
+#   name_split = auth.info.name.split(" ")
+#   user = User.where(email: auth.info.email).first
+#   user ||= User.create!(provider: auth.provider, uid: auth.uid, lastName: name_split[0], firstName: name_split[1], email: auth.info.email, password: Devise.friendly_token[0, 20])
+#     user
+# end
