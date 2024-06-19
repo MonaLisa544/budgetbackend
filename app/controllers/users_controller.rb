@@ -5,13 +5,11 @@ class UsersController < ApplicationController
     user = current_user
     if params[:user][:profile_photo]
       begin
-        base64 = params[:user][:profile_photo]
-        mime_type = base64.split(',').first.split(';').first.split(':').last
-        base64_data = base64.split(',').last
+        decoded_base64 = Base64.decode64(params[:user][:profile_photo].split(',').last)
 
-        decoded_base64 = Base64.decode64(base64_data)
-        extension = Rack::Mime::MIME_TYPES.invert[mime_type]
-        filename = [SecureRandom.uuid, extension].join
+        mime_type = MIME::Types.type_for(decoded_base64).first.content_type
+        extension = MIME::Types.type_for(mime_type).first.extensions.first
+        filename = "#{SecureRandom.uuid}.#{extension}"
 
         user.profile_photo.attach(
           io: StringIO.new(decoded_base64),
