@@ -18,15 +18,15 @@ class Api::V1::TransactionsController < ApplicationController
   end
 
   def create
-    transaction_attributes = transaction_params.except(:category_name)
+    transaction_attributes = transaction_params.except(:category_name, :transaction_type)
     category_name = transaction_params[:category_name]
+    type = transaction_params[:transaction_type]
 
     if category_name.present?
-      category = Category.find_by(name: category_name)
-      if category.nil?
-        category = Category.create(name: category_name)
+      category = Category.find_by(name: category_name, transaction_type: type, delete_flag: false)
+      if category.present?
+        transaction_attributes[:category_id] = category.id
       end
-      transaction_attributes[:category_id] = category.id
     end
 
     @transaction = current_user.transactions.build(transaction_attributes)
@@ -74,7 +74,7 @@ class Api::V1::TransactionsController < ApplicationController
 
     filtered_transactions = transactions.left_joins(:category)
                                 .select('categories.transaction_type, categories.id as category_id, categories.name, categories.icon, SUM(transaction_amount) AS total_amount')
-                                .where(transaction_date: date_range)
+                                .where(transaction_date: date_range, 'categories.delete_flag': false)
                                 .group('categories.transaction_type', 'categories.id', 'categories.name')
 
     filtered_transactions = filtered_transactions.where(categories: { transaction_type: type }) if type.present?
@@ -112,7 +112,7 @@ class Api::V1::TransactionsController < ApplicationController
 
   private
     def transaction_params
-      params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name)
+      params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name, :transaction_type)
     end
 
     def set_transaction
