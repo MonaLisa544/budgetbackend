@@ -46,3 +46,6 @@
 
 # Ignore encrypted credentials file
 /config/credentials.yml.enc
+
+# Ignore schema
+/db/schema.rb
