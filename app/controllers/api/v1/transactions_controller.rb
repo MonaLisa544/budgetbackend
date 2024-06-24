@@ -5,7 +5,8 @@ class Api::V1::TransactionsController < ApplicationController
   include TransactionsHelper
 
   def index
-    transactions = filter_transactions
+    transactions = Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id)
+                              .paginate(page: page, per_page: per_page)
     render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
 
@@ -14,53 +15,36 @@ class Api::V1::TransactionsController < ApplicationController
   end
 
   def create
-
-    save_transaction(@transaction)
+    process_transaction(@transaction, 'create')
   end
 
   def update
-    update_transaction(@transaction)
+    process_transaction(@transaction, 'update')
   end
 
   def destroy
-    Transaction.transaction do
-      @transaction.update!(delete_flag: true)
-      render json: TransactionSerializer.new(@transaction).serialized_json, status: 200
-    end
-  rescue ActiveRecord::RecordInvalid => e
-    render_error(e.record.errors.full_messages, 422)
-  rescue => e
-    render_error(e.message, 400)
+    process_transaction(@transaction, 'destroy')
   end
 
+  # get all transactions grouped by transaction type & category
   def total_transactions
-    transactions = fetch_transactions
-    type = params[:type]
-    category_id = params[:category_id]
-
-    formatted_data = aggregate_transactions(transactions, type, category_id)
+    formatted_data = aggregate_transactions
     render json: { data: formatted_data }, status: 200
   end
 
+  # get only selected category's transactions
   def category_transactions
-    transactions = fetch_transactions
-    category_id = params[:category_id]
-
-    filtered_transactions = filter_transactions_by_category(transactions, category_id)
-    render json: TransactionSerializer.new(filtered_transactions).serialized_json, status: 200
-  rescue => e
-    render_error(e.message, 500)
+    transactions = Transaction.where(category_id: params[:category_id])
+                                      .filter_by_date(params[:start_date], params[:end_date],current_user.id)
+    render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
 
   private
 
-  def transaction_params
-    params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name, :transaction_type)
-  end
-
   def set_transaction
     @transaction = Transaction.find_by(id: params[:id], user_id: current_user.id, delete_flag: false)
     render_not_found if @transaction.nil?
-  end
-
+    rescue => e
+        render json: { error: e.message }, status: 400
+    end
 end
