@@ -2,8 +2,11 @@ class User < ApplicationRecord
   devise :database_authenticatable,
          :jwt_authenticatable,
          :registerable,
-         :omniauthable, omniauth_providers: %i[facebook],
+         :recoverable, :rememberable, :validatable, 
+         :omniauthable, omniauth_providers: [:google_oauth2, :facebook],
          jwt_revocation_strategy: JwtDenylist
+
+  include RoleConstants
 
   has_many :transactions
   has_many :categories
@@ -17,14 +20,21 @@ class User < ApplicationRecord
 
   attr_accessor :skip_password_validation
 
-  def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
-      user.email = auth.info.email
-      user.password = Devise.friendly_token[0, 20]
-      user.firstName = auth.info.first_name
-      user.lastName = auth.info.last_name
-    end
-  end
+  # def self.from_omniauth(access_token)
+  #   user = User.where(email: access_token.info.email).first
+  #   unless user = User.create(
+  #     email: access_token.info.email,
+  #     password: Devise.friendly_token[0,20]
+  #     )
+  #   end 
+  #   user.firstName = access_token.info.name
+  #   user.image = access_token.info.image
+  #   user.uid = access_token.uid
+  #   user.provider = access_token.provider
+  #   user.save
+
+  #   user
+  # end
 
   private
     def password_required?

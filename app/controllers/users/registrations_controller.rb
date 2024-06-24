@@ -1,20 +1,28 @@
 class Users::RegistrationsController < Devise::RegistrationsController
+  respond_to :json
+  
+  rescue_from ActionController::ParameterMissing do |e|
+    render json: { error: e.message }, status: :unprocessable_entity
+  end
 
   private
-  def respond_with(user, _opts={})
-    if user.persisted?
+
+  def respond_with(resource, _opts = {})
+    if resource.persisted?
       render json: {
-        message: "Welcome #{user.firstName} #{user.lastName}!",
-      }, status: 200
+        message: "Welcome #{resource.firstName} #{resource.lastName}!",
+      }, status: :ok
+      UserMailer.welcome_email(resource).deliver_now
     else
       render json: {
-        status: 400,
-        message: user.errors.full_messages
-      }, status: 400
+        status: :bad_request,
+        message: resource.errors.full_messages
+      }, status: :bad_request
     end
   end
 
   def sign_up_params
-    params.require(:user).permit(:lastName, :firstName, :email,  :password, :password_confirmation, :uid, :provider)
+    params.require(:user).permit(:lastName, :firstName, :email, :password, :password_confirmation)
   end
 end
+

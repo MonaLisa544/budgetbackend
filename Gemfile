@@ -1,14 +1,21 @@
 source "https://rubygems.org"
 
 ruby "3.2.3"
-#
-gem 'activerecord-session_store'
+
+# for photo upload
+gem 'base64'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
 #device
 gem 'devise'
+
+#google login
+gem 'omniauth-google-oauth2'
+
+#
+gem 'omniauth-rails_csrf_protection'
 
 # jwt
 gem "devise-jwt"

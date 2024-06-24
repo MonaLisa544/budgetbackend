@@ -3,7 +3,23 @@ class UsersController < ApplicationController
 
   def update
     user = current_user
-    user.profile_photo.attach(params[:user][:profile_photo]) if params[:user][:profile_photo]
+    if params[:user][:profile_photo]
+      begin
+        decoded_base64 = Base64.decode64(params[:user][:profile_photo].split(',').last)
+
+        mime_type = MIME::Types.type_for(decoded_base64).first.content_type
+        extension = MIME::Types.type_for(mime_type).first.extensions.first
+        filename = "#{SecureRandom.uuid}.#{extension}"
+
+        user.profile_photo.attach(
+          io: StringIO.new(decoded_base64),
+          filename: filename,
+          content_type: mime_type
+        )
+      rescue StandardError => e
+        render json: { errors: ["Failed to decode and attach image: #{e.message}"] }, status: 400 and return
+      end
+    end
 
     if update_user(user, user_params)
       render json: {
@@ -24,7 +40,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:lastName, :firstName, :email, :profile_photo, :password, :password_confirmation)
+    params.require(:user).permit(:lastName, :firstName, :email, :password, :password_confirmation)
   end
 
   def update_user(user, user_params)
