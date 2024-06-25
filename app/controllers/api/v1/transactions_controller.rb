@@ -6,11 +6,13 @@ class Api::V1::TransactionsController < ApplicationController
 
   def index
     transactions = Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id)
-    if transactions.present?
-      render json: TransactionSerializer.new(transactions).serialized_json, status: 200
-    else
-      render_not_found
-    end
+                              .order(created_at: :desc)
+                              .paginate(page: page, per_page: per_page)
+    render json: { total_pages: transactions.total_pages,
+                   data: TransactionSerializer.new(transactions).serializable_hash[:data]
+                 }, status: 200
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { error: e.message }, status: 404
   end
 
   def show
@@ -33,25 +35,30 @@ class Api::V1::TransactionsController < ApplicationController
   def total_transactions
     formatted_data = aggregate_transactions
     render json: { data: formatted_data }, status: 200
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { error: e.message }, status: 404
   end
 
   # get only selected category's transactions
   def category_transactions
+    category = Category.find_by(id: params[:category_id])
+    raise ActiveRecord::RecordNotFound, 'Category not found' unless category
+
     transactions = Transaction.where(category_id: params[:category_id])
                               .filter_by_date(params[:start_date], params[:end_date],current_user.id)
     render json: TransactionSerializer.new(transactions).serialized_json, status: 200
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { error: e.message }, status: 404
   end
 
   private
 
   def set_transaction
     @transaction = Transaction.find_by(id: params[:id], user_id: current_user.id, delete_flag: false)
-    render_not_found if @transaction.nil?
-    rescue => e
-        render json: { error: e.message }, status: 400
-  end
-
-  def render_not_found
-    render json: { error: 'Transaction not found' }, status: 404
+    raise ActiveRecord::RecordNotFound, 'Transaction not found' unless @transaction
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { error: e.message }, status: 404
+  rescue => e
+      render json: { error: e.message }, status: 400
   end
 end

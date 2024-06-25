@@ -4,20 +4,24 @@ class Transaction < ApplicationRecord
     belongs_to :user
     belongs_to :category
 
-    validates :transaction_name, presence: true
-    validates :transaction_amount, presence: true, numericality: { greater_than: 0 }
+    validates :transaction_name, presence: true, length: { maximum: 20}
+    validates :transaction_amount, presence: true, numericality: { greater_than: 0}, length: {maximum: 10}
     attribute :transaction_date
-    attribute :description
+    validates :description, length: { maximum: 50}
     attribute :frequency
     attribute :delete_flag
 
-    scope :active_transaction, ->(user_id){
-        where(user_id: user_id, delete_flag: false)
+    scope :active_transaction, ->(user_id) {
+        transactions = where(user_id: user_id, delete_flag: false)
+        raise ActiveRecord::RecordNotFound, 'Transactions Not Found' if transactions.empty?
+        transactions
     }
 
     scope :filter_by_date, ->(start_date, end_date, user_id) {
-        active_transaction(user_id)
-            .where(transaction_date: start_date..end_date) if start_date.present? && end_date.present?
+        transactions = active_transaction(user_id)
+                        .where(transaction_date: start_date..end_date)
+        raise ActiveRecord::RecordNotFound, 'Transactions Not Found' if transactions.empty?
+        transactions
     }
 
     private
