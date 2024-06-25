@@ -9,6 +9,7 @@ require 'spec_helper'
 # Add additional requires below this line. Rails is not loaded until this point!
 require 'factory_bot_rails'
 
+require 'database_cleaner'
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
 begin
@@ -42,4 +43,15 @@ RSpec.configure do |config|
 
   # If you're using Devise with view specs as well
   config.include Devise::Test::IntegrationHelpers, type: :request
+
+  config.before(:suite) do
+    DatabaseCleaner.strategy = :transaction
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  config.around(:each) do |example|
+    DatabaseCleaner.cleaning do
+      example.run
+    end
+  end
 end

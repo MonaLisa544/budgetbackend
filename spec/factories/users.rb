@@ -8,8 +8,14 @@ FactoryBot.define do
     password { "password123" }
     password_confirmation { "password123" }
 
-    after(:build) do |user|
-      user.profile_photo.attach(io: File.open(Rails.root.join('app', 'assets', 'images', 'default_user_profile.png')), filename: 'profile_photo.png', content_type: 'image/png')
+    transient do
+      with_profile_photo { false }
+    end
+
+    after(:build) do |user, evaluator|
+      if evaluator.with_profile_photo
+        user.profile_photo.attach(io: File.open(Rails.root.join('app', 'assets', 'images', 'default_user_profile.png')), filename: 'profile_photo.png', content_type: 'image/png')
+      end
     end
   end
 end

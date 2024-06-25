@@ -30,7 +30,7 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
 
   describe 'POST #create' do
     let(:category) { create(:category, user: user) }
-    let(:valid_attributes) { { transaction: attributes_for(:transaction, user_id: user.id, category_id: category.id) } }
+    let(:valid_attributes) { { transaction: attributes_for(:transaction, user_id: user.id, category_name: category.name, transaction_type: category.transaction_type) } }
 
     context 'with valid params' do
       it 'creates a new transaction' do
