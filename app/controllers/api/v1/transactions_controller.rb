@@ -7,7 +7,10 @@ class Api::V1::TransactionsController < ApplicationController
   def index
     transactions = Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id)
                               .order(created_at: :desc)
-    render json: TransactionSerializer.new(transactions).serialized_json, status: 200
+                              .paginate(page: page, per_page: per_page)
+    render json: { total_pages: transactions.total_pages,
+                   data: TransactionSerializer.new(transactions).serializable_hash[:data]
+                 }, status: 200
   rescue ActiveRecord::RecordNotFound => e
     render json: { error: e.message }, status: 404
   end

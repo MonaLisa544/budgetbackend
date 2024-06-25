@@ -7,6 +7,8 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
   describe 'GET #index' do
     context 'with transactions present' do
       let!(:transactions) { create_list(:transaction, 5, user: user) }
+      let(:start_date) { Time.now.beginning_of_month.strftime('%Y-%m-%d') }
+      let(:end_date) { Time.now.end_of_month.strftime('%Y-%m-%d') }
 
       it 'returns a success response' do
         get :index
@@ -16,7 +18,22 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
       it 'returns paginated transactions' do
         get :index, params: { per_page: 1, page: 1 }
         expect(response).to have_http_status(200)
-        expect(json_response['data'].length).to eq(5)
+        expect(json_response['data'].length).to eq(1)
+      end
+
+      it 'returns transactions in date range' do
+        get :index, params: { start_date: start_date, end_date: end_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with start_date' do
+        get :index, params: { start_date: start_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with end_date' do
+        get :index, params: { end_date: end_date }
+        expect(response).to have_http_status(200)
       end
     end
 
@@ -50,6 +67,28 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
       it 'returns a 422 error' do
         post :create, params: { transaction: { transaction_name: '', transaction_amount: -1 } }
         expect(response).to have_http_status(422)
+        json_response = JSON.parse(response.body)
+        expect(json_response['errors']).to include("transaction_name" => "can't be blank", "transaction_amount" => "must be greater than 0")
+      end
+    end
+
+    context 'with too long name or amount params' do
+      it 'returns a 422 error' do
+        post :create, params: { transaction: { transaction_name: 'Qwertyuiopfgfhdagkfagfhdasgfdjkasfgdassssssss',
+                                               transaction_amount: 1234567891011 } }
+        expect(response).to have_http_status(422)
+        json_response = JSON.parse(response.body)
+        expect(json_response['errors']).to include("transaction_name" => "is too long (maximum is 20 characters)",
+                                                   "transaction_amount" => "is too long (maximum is 10 characters)",)
+      end
+    end
+
+    context 'without category' do
+      it 'should require to exist' do
+        post :create, params: { transaction: { transaction_name: 'Test Transaction', transaction_amount: 100 } }
+        expect(response).to have_http_status(422)
+        json_response = JSON.parse(response.body)
+        expect(json_response['errors']).to include("category" => "must exist")
       end
     end
   end
