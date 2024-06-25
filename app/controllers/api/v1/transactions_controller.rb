@@ -6,8 +6,11 @@ class Api::V1::TransactionsController < ApplicationController
 
   def index
     transactions = Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id)
-                              .paginate(page: page, per_page: per_page)
-    render json: TransactionSerializer.new(transactions).serialized_json, status: 200
+    if transactions.present?
+      render json: TransactionSerializer.new(transactions).serialized_json, status: 200
+    else
+      render_not_found
+    end
   end
 
   def show
@@ -35,7 +38,7 @@ class Api::V1::TransactionsController < ApplicationController
   # get only selected category's transactions
   def category_transactions
     transactions = Transaction.where(category_id: params[:category_id])
-                                      .filter_by_date(params[:start_date], params[:end_date],current_user.id)
+                              .filter_by_date(params[:start_date], params[:end_date],current_user.id)
     render json: TransactionSerializer.new(transactions).serialized_json, status: 200
   end
 
@@ -46,5 +49,9 @@ class Api::V1::TransactionsController < ApplicationController
     render_not_found if @transaction.nil?
     rescue => e
         render json: { error: e.message }, status: 400
-    end
+  end
+
+  def render_not_found
+    render json: { error: 'Transaction not found' }, status: 404
+  end
 end

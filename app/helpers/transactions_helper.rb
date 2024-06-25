@@ -74,10 +74,6 @@ module TransactionsHelper
     params[:per_page]&.to_i || TransactionsHelper::PER_PAGE
   end
 
-  def render_not_found
-    render json: { error: 'Transaction not found' }, status: 404
-  end
-
   def transaction_params
     params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :frequency, :category_name, :transaction_type)
   end

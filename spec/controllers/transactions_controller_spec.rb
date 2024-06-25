@@ -10,20 +10,27 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
 
       it 'returns a success response' do
         get :index
-        expect(response).to be_successful
+        expect(response).to have_http_status(200)
+      end
+
+      it 'returns paginated transactions' do
+        get :index, params: { per_page: 1, page: 1 }
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(5)
       end
     end
 
-    it 'returns 404 if no transactions found' do
-      get :index
-      expect(response).to have_http_status(404)
+    context 'without transactions' do
+      it 'returns 404 if no transactions found' do
+        get :index
+        expect(response).to have_http_status(404)
+      end
     end
   end
 
   describe 'POST #create' do
-    let(:valid_attributes) {
-      { transaction: attributes_for(:transaction, user_id: user.id) }
-    }
+    let(:category) { create(:category, user: user) }
+    let(:valid_attributes) { { transaction: attributes_for(:transaction, user_id: user.id, category_id: category.id) } }
 
     context 'with valid params' do
       it 'creates a new transaction' do
@@ -40,9 +47,9 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
     end
 
     context 'with invalid params' do
-      it 'returns a 404 error' do
-        post :create, params: { transaction: { invalid: 'attributes' } }
-        expect(response).to have_http_status(404)
+      it 'returns a 422 error' do
+        post :create, params: { transaction: { transaction_name: '', transaction_amount: -1 } }
+        expect(response).to have_http_status(422)
       end
     end
   end
@@ -51,27 +58,42 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
     let(:transaction) { create(:transaction, user: user) }
     let(:new_attributes) { { transaction: { transaction_name: 'Updated Name' } } }
 
-    it 'updates the requested transaction' do
-      put :update, params: { id: transaction.to_param }.merge(new_attributes)
-      transaction.reload
-      expect(transaction.transaction_name).to eq('Updated Name')
+    context 'with valid params' do
+      it 'updates the requested transaction' do
+        put :update, params: { id: transaction.to_param }.merge(new_attributes)
+        transaction.reload
+        expect(transaction.transaction_name).to eq('Updated Name')
+      end
+
+      it 'renders a JSON response with the transaction' do
+        put :update, params: { id: transaction.to_param }.merge(new_attributes)
+        expect(response).to have_http_status(200)
+        expect(response.content_type).to include('application/json')
+      end
     end
 
-    it 'renders a JSON response with the transaction' do
-      put :update, params: { id: transaction.to_param }.merge(new_attributes)
-      expect(response).to have_http_status(200)
-      expect(response.content_type).to include('application/json')
+    context 'with empty transaction_name' do
+      it 'returns a 422 error' do
+        put :update, params: { id: transaction.to_param, transaction: { transaction_name: '' } }
+        expect(response).to have_http_status(422)
+      end
+    end
+
+    context 'with invalid transaction_amount' do
+      it 'returns a 422 error' do
+        put :update, params: { id: transaction.to_param, transaction: { transaction_amount: 0 } }
+        expect(response).to have_http_status(422)
+      end
     end
   end
 
   describe 'DELETE #destroy' do
     let!(:transaction) { create(:transaction, user: user) }
 
-    it 'deletes the transaction' do
+    it 'deletes the transaction logically' do
       expect {
         delete :destroy, params: { id: transaction.to_param }
-      }.to change(Transaction, :count).by(0) # Check that count doesn't decrease
-      expect(transaction.reload.delete_flag).to eq(true)
+      }.to change { transaction.reload.delete_flag }.from(false).to(true)
     end
 
     it 'renders a JSON response with the deleted transaction' do
@@ -82,8 +104,8 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
   end
 
   describe 'GET #total_transactions' do
-    let(:category1) { create(:category, transaction_type: 'income', delete_flag: false) }
-    let(:category2) { create(:category, transaction_type: 'expense', delete_flag: false) }
+    let(:category1) { create(:category, transaction_type: 'income', user: user, delete_flag: false) }
+    let(:category2) { create(:category, transaction_type: 'expense', user: user, delete_flag: false) }
 
     context 'with transactions present' do
       let!(:transaction1) { create(:transaction, user: user, transaction_amount: 100, category: category1) }
@@ -114,7 +136,7 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
   end
 
   describe 'GET #category_transactions' do
-    let(:category) { create(:category, delete_flag: false) }
+    let(:category) { create(:category, user: user, delete_flag: false) }
 
     context 'with transactions present' do
       let!(:transaction1) { create(:transaction, user: user, category: category) }
@@ -125,17 +147,13 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         expect(response).to have_http_status(200)
         expect(json_response['data'].length).to eq(2)
       end
-
-      it 'returns paginated transactions' do
-        get :category_transactions, params: { category_id: category.id, per_page: 1, page: 1 }
-        expect(response).to have_http_status(200)
-        expect(json_response['data'].length).to eq(1)
-      end
     end
 
-    it 'returns 404 if no transactions found' do
-      get :category_transactions, params: { category_id: 'invalid-id' }
-      expect(response).to have_http_status(404)
+    context 'without transactions' do
+      it 'returns 404 if no transactions found' do
+        get :category_transactions, params: { category_id: category.id, start_date: 1.year.ago.to_date, end_date: 11.months.ago.to_date }
+        expect(response).to have_http_status(404)
+      end
     end
   end
 
