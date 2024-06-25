@@ -4,10 +4,10 @@ class Transaction < ApplicationRecord
     belongs_to :user
     belongs_to :category
 
-    validates :transaction_name, presence: true
-    validates :transaction_amount, presence: true, numericality: { greater_than: 0 }
+    validates :transaction_name, presence: true, length: { maximum: 20}
+    validates :transaction_amount, presence: true, numericality: { greater_than: 0}, length: {maximum: 10}
     attribute :transaction_date
-    attribute :description
+    validates :description, length: { maximum: 50}
     attribute :frequency
     attribute :delete_flag
 
