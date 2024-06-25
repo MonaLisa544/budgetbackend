@@ -46,8 +46,8 @@ module TransactionsHelper
     # get all categories with it's sum of transaction_amount
     categories = Category.left_joins(:transactions)
                          .select('categories.id, categories.name, COALESCE(SUM(transactions.transaction_amount), 0) as amount, categories.icon, categories.transaction_type')
-                         .group('categories.id, categories.name, categories.icon, categories.transaction_type')
-                         .where('categories.user_id = ? AND categories.delete_flag = false', current_user.id)
+                         .group('categories.id, transaction_type')
+                         .where(user_id: current_user.id, delete_flag: false)
                          .merge(Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id))
 
     categories = categories.where(id: params[:category_id]) if params[:category_id].present?
@@ -60,13 +60,6 @@ module TransactionsHelper
       }
     end
     formatted_data
-  end
-
-  def get_transactions
-    transactions = Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id)
-    rescue ActiveRecord::RecordNotFound => e
-      render json: { error: e.message }, status: 404
-    transactions
   end
 
   def format_errors(errors)
