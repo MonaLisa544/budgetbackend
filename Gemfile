@@ -56,9 +56,18 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # For Pagination
 gem 'will_paginate', '~> 3.3'
 
+# For repeated transactions (frequency)
+gem 'whenever', require: false
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
+  # test gem
+  gem 'rspec-rails'
+  # used to create test data
+  gem 'factory_bot_rails'
+  # for temporary email
+  gem 'faker'
 end
 
 group :development do
