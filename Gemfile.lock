@@ -262,6 +262,8 @@ GEM
     seed-fu (2.3.9)
       activerecord (>= 3.1)
       activesupport (>= 3.1)
+    shoulda-matchers (6.2.0)
+      activesupport (>= 5.2.0)
     snaky_hash (2.0.1)
       hashie
       version_gem (~> 1.1, >= 1.1.1)
@@ -316,6 +318,7 @@ DEPENDENCIES
   rails (= 7.0.8)
   rspec-rails
   seed-fu (~> 2.3, >= 2.3.9)
+  shoulda-matchers
   tzinfo-data
   whenever
   will_paginate (~> 3.3)
