@@ -5,6 +5,13 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
   before { sign_in(user) }
 
   describe 'GET #index' do
+    context 'without transactions' do
+      it 'returns empty if no transactions found' do
+        get :index
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
+      end
+    end
     context 'with transactions present' do
       let!(:transactions) { create_list(:transaction, 5, user: user) }
       let(:start_date) { Time.now.beginning_of_month.strftime('%Y-%m-%d') }
@@ -35,12 +42,20 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         get :index, params: { end_date: end_date }
         expect(response).to have_http_status(200)
       end
-    end
 
-    context 'without transactions' do
-      it 'returns 404 if no transactions found' do
-        get :index
-        expect(response).to have_http_status(404)
+      it 'returns transactions in date range' do
+        get :index, params: { start_date: start_date, end_date: end_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with start_date' do
+        get :index, params: { start_date: start_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with end_date' do
+        get :index, params: { end_date: end_date }
+        expect(response).to have_http_status(200)
       end
     end
   end
@@ -170,9 +185,10 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         expect(json_response['data']).not_to include('income')
       end
 
-      it 'returns 404 if no transactions found' do
+      it 'returns empty if no transactions found' do
         get :total_transactions, params: { start_date: 1.year.ago.to_date, end_date: 11.months.ago.to_date }
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
       end
     end
   end
@@ -198,9 +214,16 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
     end
 
     context 'without transactions' do
-      it 'returns 404 if no transactions found' do
+      it 'returns empty if no transactions found' do
         get :category_transactions, params: { category_id: category.id, start_date: 1.year.ago.to_date, end_date: 11.months.ago.to_date }
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
+      end
+
+      it 'returns empty for invalid date_range' do
+        get :category_transactions, params: { category_id: category.id, start_date: Date.tomorrow}
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
       end
 
       it 'returns 404 for invalid date_range' do

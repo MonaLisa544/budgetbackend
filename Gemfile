@@ -64,6 +64,8 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
   # test gem
   gem 'rspec-rails'
+  # test simpler
+  gem 'shoulda-matchers'
   # used to create test data
   gem 'factory_bot_rails'
   # for temporary email

@@ -70,16 +70,16 @@ class Api::V1::CategoriesController < ApplicationController
         def category_params
             params.require(:category).permit(:name, :icon, :transaction_type)
         end
-
         def set_category
-            begin
-              @category = Category.find_by(user_id: current_user.id, id: params[:id], delete_flag: false)
-              unless @category
-                raise ActiveRecord::RecordNotFound, 'Category not found'
-              end
-            rescue ActiveRecord::RecordNotFound => exception
-                render json: { errors: { name: [exception.message] }}, status: :not_found
+          begin
+            # Adjust the query to match your database schema and associations
+            @category = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, RoleConstants::ADMIN_ROLE).find_by(id: params[:id], delete_flag: false)
+        
+            unless @category
+              raise ActiveRecord::RecordNotFound, 'Category not found'
             end
+          rescue ActiveRecord::RecordNotFound => exception
+            render json: { errors: { name: [exception.message] }}, status: :not_found
           end
-          
+        end  
 end
