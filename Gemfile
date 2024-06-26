@@ -60,6 +60,8 @@ group :development, :test do
   gem 'faker'
   # for clearing test data
   gem 'database_cleaner'
+  # For test coverage
+  gem 'simplecov'
 end
 
 group :development do

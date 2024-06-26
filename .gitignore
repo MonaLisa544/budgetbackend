@@ -35,6 +35,9 @@
 # Ignore vendor
 /vendor
 
+# Ignore test coverage
+/coverage
+
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
@@ -49,3 +52,6 @@
 
 # Ignore schema
 /db/schema.rb
+coverage/.last_run.json
+coverage/.resultset.json
+coverage/index.html
