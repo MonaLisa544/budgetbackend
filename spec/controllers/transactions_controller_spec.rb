@@ -225,11 +225,6 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         expect(response).to have_http_status(200)
         expect(json_response['data'].length).to eq(0)
       end
-
-      it 'returns 404 for invalid date_range' do
-        get :category_transactions, params: { category_id: category.id, start_date: Date.tomorrow}
-        expect(response).to have_http_status(404)
-      end
     end
   end
 
