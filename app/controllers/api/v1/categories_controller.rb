@@ -4,12 +4,13 @@ class Api::V1::CategoriesController < ApplicationController
 
     def index
         begin
-          @categories = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, RoleConstants::ADMIN_ROLE).where(delete_flag: false)
+          @categories = Category.find_by(user_id: current_user.id, delete_flag: false)
           type = params[:type]
           
             @categories = @categories.where(transaction_type: type) if type.present?
+            
             if @categories.present?
-                render json: @categories
+              render json: CategorySerializer.new(@categories).serialized_json
             else
                 raise ActiveRecord::RecordNotFound, 'Category not found'
             end  
@@ -73,7 +74,7 @@ class Api::V1::CategoriesController < ApplicationController
         def set_category
           begin
             # Adjust the query to match your database schema and associations
-            @category = Category.where("categories.user_id = ? OR EXISTS (SELECT 1 FROM users WHERE users.id = categories.user_id AND users.role = ?)", current_user.id, RoleConstants::ADMIN_ROLE).find_by(id: params[:id], delete_flag: false)
+            @category = Category.find_by(user_id: current_user.id, id: params[:id], delete_flag: false)
         
             unless @category
               raise ActiveRecord::RecordNotFound, 'Category not found'

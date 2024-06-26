@@ -9,6 +9,10 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
+      Category.create(name: "Цалин", transaction_type: "income", user_id: resource.id)
+      Category.create(name: "Хоол хүнс", transaction_type: "expense", user_id: resource.id)
+      Category.create(name: "Хувцас", transaction_type: "expense", user_id: resource.id)
+      
       render json: {
         message: "Welcome #{resource.firstName} #{resource.lastName}!",
       }, status: :ok

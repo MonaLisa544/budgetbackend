@@ -3,10 +3,7 @@ class User < ApplicationRecord
          :jwt_authenticatable,
          :registerable,
          :recoverable, :rememberable, :validatable, 
-         :omniauthable, omniauth_providers: [:google_oauth2, :facebook],
          jwt_revocation_strategy: JwtDenylist
-
-  include RoleConstants
 
   has_many :transactions
   has_many :categories
@@ -19,22 +16,6 @@ class User < ApplicationRecord
   has_one_attached :profile_photo
 
   attr_accessor :skip_password_validation
-
-  # def self.from_omniauth(access_token)
-  #   user = User.where(email: access_token.info.email).first
-  #   unless user = User.create(
-  #     email: access_token.info.email,
-  #     password: Devise.friendly_token[0,20]
-  #     )
-  #   end 
-  #   user.firstName = access_token.info.name
-  #   user.image = access_token.info.image
-  #   user.uid = access_token.uid
-  #   user.provider = access_token.provider
-  #   user.save
-
-  #   user
-  # end
 
   private
     def password_required?
