@@ -14,8 +14,6 @@ module TransactionsHelper
         transaction.update!(attributes)
       when 'destroy'
         transaction.update!(delete_flag: true)
-      else
-        render json: { error: 'Unknown action' }, status: 400 and return
       end
     end
     render json: TransactionSerializer.new(transaction).serialized_json

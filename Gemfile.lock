@@ -95,6 +95,7 @@ GEM
       devise (~> 4.0)
       warden-jwt_auth (~> 0.8)
     diff-lcs (1.5.1)
+    docile (1.4.0)
     dotenv (3.1.2)
     dotenv-rails (3.1.2)
       dotenv (= 3.1.2)
@@ -268,6 +269,14 @@ GEM
     seed-fu (2.3.9)
       activerecord (>= 3.1)
       activesupport (>= 3.1)
+    shoulda-matchers (6.2.0)
+      activesupport (>= 5.2.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-html (0.12.3)
+    simplecov_json_formatter (0.1.4)
     snaky_hash (2.0.1)
       hashie
       version_gem (~> 1.1, >= 1.1.1)
@@ -323,6 +332,8 @@ DEPENDENCIES
   rails (= 7.0.8)
   rspec-rails
   seed-fu (~> 2.3, >= 2.3.9)
+  shoulda-matchers
+  simplecov
   tzinfo-data
   whenever
   will_paginate (~> 3.3)
