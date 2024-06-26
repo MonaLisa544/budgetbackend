@@ -12,16 +12,11 @@ class Transaction < ApplicationRecord
     attribute :delete_flag
 
     scope :active_transaction, ->(user_id) {
-        transactions = where(user_id: user_id, delete_flag: false)
-        raise ActiveRecord::RecordNotFound, 'Transactions Not Found' if transactions.empty?
-        transactions
+        where(user_id: user_id, delete_flag: false)
     }
 
     scope :filter_by_date, ->(start_date, end_date, user_id) {
-        transactions = active_transaction(user_id)
-                        .where(transaction_date: start_date..end_date)
-        raise ActiveRecord::RecordNotFound, 'Transactions Not Found' if transactions.empty?
-        transactions
+        active_transaction(user_id).where(transaction_date: start_date..end_date)
     }
 
     private
