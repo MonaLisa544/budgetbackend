@@ -5,6 +5,13 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
   before { sign_in(user) }
 
   describe 'GET #index' do
+    context 'without transactions' do
+      it 'returns empty if no transactions found' do
+        get :index
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
+      end
+    end
     context 'with transactions present' do
       let!(:transactions) { create_list(:transaction, 5, user: user) }
       let(:start_date) { Time.now.beginning_of_month.strftime('%Y-%m-%d') }
@@ -35,12 +42,20 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         get :index, params: { end_date: end_date }
         expect(response).to have_http_status(200)
       end
-    end
 
-    context 'without transactions' do
-      it 'returns 404 if no transactions found' do
-        get :index
-        expect(response).to have_http_status(404)
+      it 'returns transactions in date range' do
+        get :index, params: { start_date: start_date, end_date: end_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with start_date' do
+        get :index, params: { start_date: start_date }
+        expect(response).to have_http_status(200)
+      end
+
+      it 'can filter only with end_date' do
+        get :index, params: { end_date: end_date }
+        expect(response).to have_http_status(200)
       end
     end
   end
@@ -67,17 +82,15 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
       it 'returns a 422 error' do
         post :create, params: { transaction: { transaction_name: '', transaction_amount: -1 } }
         expect(response).to have_http_status(422)
-        json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("transaction_name" => "can't be blank", "transaction_amount" => "must be greater than 0")
       end
     end
 
     context 'with too long name or amount params' do
       it 'returns a 422 error' do
-        post :create, params: { transaction: { transaction_name: 'Qwertyuiopfgfhdagkfagfhdasgfdjkasfgdassssssss',
+        post :create, params: { transaction: { transaction_name: 'a' * 30,
                                                transaction_amount: 1234567891011 } }
         expect(response).to have_http_status(422)
-        json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("transaction_name" => "is too long (maximum is 20 characters)",
                                                    "transaction_amount" => "is too long (maximum is 10 characters)",)
       end
@@ -87,7 +100,6 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
       it 'should require to exist' do
         post :create, params: { transaction: { transaction_name: 'Test Transaction', transaction_amount: 100 } }
         expect(response).to have_http_status(422)
-        json_response = JSON.parse(response.body)
         expect(json_response['errors']).to include("category" => "must exist")
       end
     end
@@ -166,10 +178,17 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
           'income' => hash_including('total' => 100)
         )
       end
+      it 'filters by transaction type if provided' do
+        get :total_transactions, params: { type: 'expense'}
+        expect(response).to have_http_status(200)
+        expect(json_response['data']).to include('expense')
+        expect(json_response['data']).not_to include('income')
+      end
 
-      it 'returns 404 if no transactions found' do
+      it 'returns empty if no transactions found' do
         get :total_transactions, params: { start_date: 1.year.ago.to_date, end_date: 11.months.ago.to_date }
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
       end
     end
   end
@@ -186,12 +205,25 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
         expect(response).to have_http_status(200)
         expect(json_response['data'].length).to eq(2)
       end
+
+      it 'returns transactions for given date_range' do
+        get :category_transactions, params: { category_id: category.id, start_date: 1.week.ago.to_date, end_date: Date.today}
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(2)
+      end
     end
 
     context 'without transactions' do
-      it 'returns 404 if no transactions found' do
+      it 'returns empty if no transactions found' do
         get :category_transactions, params: { category_id: category.id, start_date: 1.year.ago.to_date, end_date: 11.months.ago.to_date }
-        expect(response).to have_http_status(404)
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
+      end
+
+      it 'returns empty for invalid date_range' do
+        get :category_transactions, params: { category_id: category.id, start_date: Date.tomorrow}
+        expect(response).to have_http_status(200)
+        expect(json_response['data'].length).to eq(0)
       end
     end
   end

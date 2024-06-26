@@ -1,5 +1,9 @@
 # spec/rails_helper.rb
 
+# For test coverages
+require 'simplecov'
+SimpleCov.start
+
 ENV['RAILS_ENV'] ||= 'test'
 require File.expand_path('../config/environment', __dir__)
 abort("The Rails environment is running in production mode!") if Rails.env.production?
@@ -49,9 +53,18 @@ RSpec.configure do |config|
     DatabaseCleaner.clean_with(:truncation)
   end
 
+  # clean test data
   config.around(:each) do |example|
     DatabaseCleaner.cleaning do
       example.run
+    end
+  end
+
+  # for simple one-liner test
+  Shoulda::Matchers.configure do |config|
+    config.integrate do |with|
+      with.test_framework :rspec
+      with.library :rails
     end
   end
 end

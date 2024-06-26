@@ -14,8 +14,6 @@ module TransactionsHelper
         transaction.update!(attributes)
       when 'destroy'
         transaction.update!(delete_flag: true)
-      else
-        render json: { error: 'Unknown action' }, status: 400 and return
       end
     end
     render json: TransactionSerializer.new(transaction).serialized_json
@@ -34,9 +32,8 @@ module TransactionsHelper
     type = transaction_params[:transaction_type]
 
     if category_name.present?
-      category = Category.find_by(user_id: current_user.id, name: category_name, transaction_type: type, delete_flag: false)
-      raise ActiveRecord::RecordNotFound, "Category not found" unless category
-      transaction_attributes[:category_id] = category.id
+      category = Category.find_by(name: category_name, transaction_type: type, delete_flag: false)
+      transaction_attributes[:category_id] = category.id if category.present?
     end
 
     transaction_attributes
@@ -48,10 +45,11 @@ module TransactionsHelper
                          .select('categories.id, categories.name, COALESCE(SUM(transactions.transaction_amount), 0) as amount, categories.icon, categories.transaction_type')
                          .group('categories.id, transaction_type')
                          .where(user_id: current_user.id, delete_flag: false)
-                         .merge(Transaction.filter_by_date(params[:start_date], params[:end_date], current_user.id))
+                         .where('transactions.delete_flag = false OR transactions.id IS NULL')
 
     categories = categories.where(id: params[:category_id]) if params[:category_id].present?
     categories = categories.where(transaction_type: params[:type]) if params[:type].present?
+    categories = categories.where(transactions: {transaction_date: params[:start_date]..params[:end_date]}) if params[:start_date].present? || params[:end_date].present?
 
     formatted_data = categories.group_by(&:transaction_type).transform_values do |categories|
       {
