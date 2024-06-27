@@ -1,9 +1,6 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
 
-  rescue_from ActionController::ParameterMissing do |e|
-    render json: { error: e.message }, status: :unprocessable_entity
-  end
 
   private
 
@@ -22,6 +19,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
         message: resource.errors.full_messages
       }, status: 400
     end
+  end
+  def sign_up(resource_name, resource)
   end
 
   def sign_up_params
