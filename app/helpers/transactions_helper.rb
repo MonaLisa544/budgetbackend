@@ -32,7 +32,7 @@ module TransactionsHelper
     type = transaction_params[:transaction_type]
 
     if category_name.present?
-      category = Category.find_by(name: category_name, transaction_type: type, delete_flag: false)
+      category = Category.find_by(user_id: current_user.id, name: category_name, transaction_type: type, delete_flag: false)
       transaction_attributes[:category_id] = category.id if category.present?
     end
 
