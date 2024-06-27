@@ -1,6 +1,6 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
-  
+
   rescue_from ActionController::ParameterMissing do |e|
     render json: { error: e.message }, status: :unprocessable_entity
   end
@@ -12,16 +12,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
       Category.create(name: "Цалин", transaction_type: "income", user_id: resource.id)
       Category.create(name: "Хоол хүнс", transaction_type: "expense", user_id: resource.id)
       Category.create(name: "Хувцас", transaction_type: "expense", user_id: resource.id)
-      
+
       render json: {
         message: "Welcome #{resource.firstName} #{resource.lastName}!",
-      }, status: :ok
+      }, status: 200
       UserMailer.welcome_email(resource).deliver_now
     else
       render json: {
-        status: :bad_request,
         message: resource.errors.full_messages
-      }, status: :bad_request
+      }, status: 400
     end
   end
 
@@ -29,4 +28,3 @@ class Users::RegistrationsController < Devise::RegistrationsController
     params.require(:user).permit(:lastName, :firstName, :email, :password, :password_confirmation)
   end
 end
-

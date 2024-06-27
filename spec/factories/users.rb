@@ -2,20 +2,10 @@ require 'faker'
 
 FactoryBot.define do
   factory :user do
-    firstName { "John" }
-    lastName { "Doe" }
+    firstName { "Tuugu" }
+    lastName { "Chimgee" }
     email { Faker::Internet.email }
     password { "password123" }
     password_confirmation { "password123" }
-
-    transient do
-      with_profile_photo { false }
-    end
-
-    after(:build) do |user, evaluator|
-      if evaluator.with_profile_photo
-        user.profile_photo.attach(io: File.open(Rails.root.join('app', 'assets', 'images', 'default_user_profile.png')), filename: 'profile_photo.png', content_type: 'image/png')
-      end
-    end
   end
 end
