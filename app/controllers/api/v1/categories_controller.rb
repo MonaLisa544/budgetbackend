@@ -4,13 +4,13 @@ class Api::V1::CategoriesController < ApplicationController
 
     def index
         begin
-          @categories = Category.find_by(user_id: current_user.id, delete_flag: false)
+          @categories = Category.where(user_id: current_user.id, delete_flag: false)
           type = params[:type]
           
             @categories = @categories.where(transaction_type: type) if type.present?
             
             if @categories.present?
-              render json: CategorySerializer.new(@categories).serialized_json
+              render json: @categories
             else
                 raise ActiveRecord::RecordNotFound, 'Category not found'
             end  
