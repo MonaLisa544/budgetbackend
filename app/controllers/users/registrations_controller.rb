@@ -12,6 +12,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
       render json: {
         message: "Welcome #{resource.firstName} #{resource.lastName}!",
+        token: request.env['warden-jwt_auth.token']
       }, status: 200
       UserMailer.welcome_email(resource).deliver_now
     else
@@ -19,8 +20,6 @@ class Users::RegistrationsController < Devise::RegistrationsController
         message: resource.errors.full_messages
       }, status: 400
     end
-  end
-  def sign_up(resource_name, resource)
   end
 
   def sign_up_params
