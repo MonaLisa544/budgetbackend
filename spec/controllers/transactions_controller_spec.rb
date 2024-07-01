@@ -60,6 +60,33 @@ RSpec.describe Api::V1::TransactionsController, type: :controller do
     end
   end
 
+  describe 'GET #show' do
+    context 'with existing transaction' do
+      let!(:transaction) { create(:transaction, user: user) }
+
+      it 'returns the requested transaction' do
+        get :show, params: { id: transaction.id }
+        expect(response).to have_http_status(200)
+        expect(response.content_type).to include('application/json')
+        expect(json_response['data']).to include(
+          'id' => transaction.id.to_s,
+          'attributes' => hash_including(
+            'transaction_name' => transaction.transaction_name,
+            'transaction_amount' => transaction.transaction_amount
+          )
+        )
+      end
+    end
+
+    context 'with non-existing transaction' do
+      it 'returns a 404 error' do
+        get :show, params: { id: 0 }
+        expect(response).to have_http_status(200)
+        expect(json_response['errors']).to include("error" => "Transaction not found")
+      end
+    end
+  end
+
   describe 'POST #create' do
     let(:category) { create(:category, user: user) }
     let(:valid_attributes) { { transaction: attributes_for(:transaction, user_id: user.id, category_name: category.name, transaction_type: category.transaction_type) } }

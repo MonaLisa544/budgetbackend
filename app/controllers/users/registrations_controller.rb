@@ -1,20 +1,18 @@
 class Users::RegistrationsController < Devise::RegistrationsController
   respond_to :json
 
-  rescue_from ActionController::ParameterMissing do |e|
-    render json: { error: e.message }, status: :unprocessable_entity
-  end
 
   private
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
-      Category.create(name: "Цалин", transaction_type: "income", user_id: resource.id)
-      Category.create(name: "Хоол хүнс", transaction_type: "expense", user_id: resource.id)
-      Category.create(name: "Хувцас", transaction_type: "expense", user_id: resource.id)
+      Category.create(name: "Цалин", transaction_type: "income", user_id: resource.id, icon: 'heartPulse')
+      Category.create(name: "Хоол хүнс", transaction_type: "expense", user_id: resource.id, icon: 'soup')
+      Category.create(name: "Хувцас", transaction_type: "expense", user_id: resource.id, icon: 'candy')
 
       render json: {
         message: "Welcome #{resource.firstName} #{resource.lastName}!",
+        token: request.env['warden-jwt_auth.token']
       }, status: 200
       UserMailer.welcome_email(resource).deliver_now
     else

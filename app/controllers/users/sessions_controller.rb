@@ -6,11 +6,7 @@ class Users::SessionsController < Devise::SessionsController
     if user && user.valid_password?(params[:user][:password])
       super
     else
-      message =  if user.nil?
-        "Not registered. Please sign up!"
-      else
-        "Password incorrect. Please try again!"
-      end
+      message = user.nil? ? "Not registered. Please sign up!" : "Password incorrect. Please try again!"
       render json: { message: message }, status: 401
     end
   end
@@ -24,12 +20,7 @@ class Users::SessionsController < Devise::SessionsController
     end
   end
   def respond_to_on_destroy
-    current_user ? log_out_success : log_out_failure
-  end
-  def log_out_success
-    render json: { message: "Logged out." }, status: 200
-  end
-  def log_out_failure
-    render json: { message: "Logged out failure."}, status: 401
+    Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+    render json: {:message => 'Logged out'}.to_json, status: 200
   end
 end

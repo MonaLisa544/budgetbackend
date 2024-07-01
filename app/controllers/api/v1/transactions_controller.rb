@@ -33,8 +33,6 @@ class Api::V1::TransactionsController < ApplicationController
   def total_transactions
     formatted_data = aggregate_transactions
     render json: { data: formatted_data }, status: 200
-  rescue ActiveRecord::RecordNotFound => e
-    render json: { error: e.message }, status: 404
   end
 
   # get only selected category's transactions
