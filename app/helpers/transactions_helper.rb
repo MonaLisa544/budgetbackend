@@ -9,9 +9,15 @@ module TransactionsHelper
         attributes = build_transaction_attributes
         transaction = current_user.transactions.build(attributes)
         transaction.save!
+        transaction.create_recurring if transaction.frequency
       when 'update'
         attributes = build_transaction_attributes
         transaction.update!(attributes)
+        if !transaction.frequency
+          transaction.delete_associated_recurring_transactions
+        else
+          transaction.create_recurring
+        end
       when 'destroy'
         transaction.update!(delete_flag: true)
       end
@@ -42,14 +48,17 @@ module TransactionsHelper
   def aggregate_transactions
     # get all categories with it's sum of transaction_amount
     categories = Category.left_joins(:transactions)
-                         .select('categories.id, categories.name, COALESCE(SUM(transactions.transaction_amount), 0) as amount, categories.icon, categories.transaction_type')
-                         .group('categories.id, transaction_type')
-                         .where(user_id: current_user.id, delete_flag: false)
-                         .where('transactions.delete_flag = false OR transactions.id IS NULL')
+                       .select('categories.id, categories.name, categories.icon, categories.transaction_type,
+                                COALESCE(SUM(CASE WHEN transactions.delete_flag = false THEN transactions.transaction_amount ELSE 0 END), 0) as amount,
+                                COUNT(CASE WHEN transactions.delete_flag = false THEN transactions.id ELSE NULL END) as transactions_count')
+                       .group('categories.id, categories.transaction_type')
+                       .where(user_id: current_user.id, delete_flag: false)
 
     categories = categories.where(id: params[:category_id]) if params[:category_id].present?
     categories = categories.where(transaction_type: params[:type]) if params[:type].present?
-    categories = categories.where(transactions: {transaction_date: params[:start_date]..params[:end_date]}) if params[:start_date].present? || params[:end_date].present?
+    if params[:start_date].present? || params[:end_date].present?
+      categories = categories.having("COUNT(transactions.id) = 0 OR COUNT(transactions.transaction_date BETWEEN ? AND ?) >= 0", params[:start_date], params[:end_date])
+    end
 
     formatted_data = categories.group_by(&:transaction_type).transform_values do |categories|
       {
