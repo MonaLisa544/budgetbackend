@@ -23,6 +23,9 @@ gem "fast_jsonapi"
 #encodein and decoding
 gem 'jwt'
 
+# for recurring transaction
+gem 'ice_cube'
+
 # middleware
 gem "rack-cors"
 
