@@ -21,6 +21,6 @@ class Users::SessionsController < Devise::SessionsController
   end
   def respond_to_on_destroy
     Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
-    render json: {:success => true, token: nil }.to_json, status: 200
+    render json: {:message => 'Logged out'}.to_json, status: 200
   end
 end
