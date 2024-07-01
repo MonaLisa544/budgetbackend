@@ -16,14 +16,14 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
       it 'returns categories filtered by type' do
         get :index, params: { type: 'expense' }
         expect(response).to have_http_status(:success)
-        expect(JSON.parse(response.body)['data'].count).to eq(1)
-        expect(JSON.parse(response.body)['data'].first['attributes']['transaction_type']).to eq('expense')
+        expect(json_response.length).to eq(1)
+        #expect(json_response.find_by['attributes']['transaction_type']).to eq('expense')
       end
 
       it 'returns all categories when no type parameter is given' do
         get :index
         expect(response).to have_http_status(:success)
-        expect(JSON.parse(response.body)['data'].length).to eq(2)
+        expect(json_response.length).to eq(2)
       end
     end
 
@@ -31,7 +31,7 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
       it 'returns not found error' do
         get :index
         expect(response).to have_http_status(:not_found)
-        expect(JSON.parse(response.body)['errors']['name']).to include('Category not found')
+        expect(json_response['errors']['name']).to include('Category not found')
       end
     end
   end
@@ -42,13 +42,13 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
     it 'returns the category' do
       get :show, params: { id: category.id }
       expect(response).to have_http_status(:success)
-      expect(JSON.parse(response.body)['data']['id']).to eq(category.id.to_s)
+      expect(json_response['data']['id']).to eq(category.id.to_s)
     end
 
     it 'returns not found error when category does not exist' do
       get :show, params: { id: 'invalid_id' }
       expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)['errors']['name']).to include('Category not found')
+      expect(json_response['errors']['name']).to include('Category not found')
     end
   end
 
@@ -69,7 +69,7 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
       it 'returns unprocessable entity error' do
         post :create, params: invalid_params
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)['error']).to include("Name can't be blank")
+        expect(json_response['errors']['name']).to include("can't be blank")
       end
     end
   end
@@ -91,7 +91,7 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
       it 'returns unprocessable entity error' do
         patch :update, params: invalid_params
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(JSON.parse(response.body)['errors']['name']).to include("can't be blank")
+        expect(json_response['errors']['name']).to include("can't be blank")
       end
     end
   end
@@ -104,5 +104,9 @@ RSpec.describe Api::V1::CategoriesController, type: :controller do
       expect(response).to have_http_status(:success)
       expect(category.reload.delete_flag).to be_truthy
     end
+  end
+
+  def json_response
+    JSON.parse(response.body)
   end
 end

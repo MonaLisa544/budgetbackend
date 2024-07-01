@@ -10,4 +10,3 @@ class Category < ApplicationRecord
   enum :transaction_type, { expense: 'expense', income: 'income' }
   attribute :delete_flag
 end
-git status 
