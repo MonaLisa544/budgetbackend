@@ -6,19 +6,19 @@ class Api::V1::CategoriesController < ApplicationController
         begin
           @categories = Category.where(user_id: current_user.id, delete_flag: false)
           type = params[:type]
-          
+
             @categories = @categories.where(transaction_type: type) if type.present?
-            
+
             if @categories.present?
               render json: @categories
             else
                 raise ActiveRecord::RecordNotFound, 'Category not found'
-            end  
+            end
         rescue ActiveRecord::RecordNotFound => exception
             render json: { errors: { name: [exception.message] }}, status: :not_found
         end
       end
-      
+
     def show
         render json: CategorySerializer.new(@category).serialized_json
     end
@@ -58,7 +58,7 @@ class Api::V1::CategoriesController < ApplicationController
 
         if category_other.nil?
             category_other = Category.new(name: 'Other', user_id: current_user.id, transaction_type: @category.transaction_type, icon: 'circleOff')
-            category_other.save
+            category_other.save!
         end
 
         transactions.update_all(category_id: category_other.id)
@@ -75,12 +75,12 @@ class Api::V1::CategoriesController < ApplicationController
           begin
             # Adjust the query to match your database schema and associations
             @category = Category.find_by(user_id: current_user.id, id: params[:id], delete_flag: false)
-        
+
             unless @category
               raise ActiveRecord::RecordNotFound, 'Category not found'
             end
           rescue ActiveRecord::RecordNotFound => exception
             render json: { errors: { name: [exception.message] }}, status: :not_found
           end
-        end  
+        end
 end

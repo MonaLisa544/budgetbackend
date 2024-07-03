@@ -8,17 +8,21 @@ module TransactionsHelper
       when 'create'
         attributes = build_transaction_attributes
         transaction = current_user.transactions.build(attributes)
-        transaction.save!
-        transaction.create_recurring if transaction.frequency
+        if transaction.frequency
+          transaction.create_recurring
+        else
+          transaction.save!
+        end
       when 'update'
         attributes = build_transaction_attributes
         transaction.update!(attributes)
         if !transaction.frequency
           transaction.delete_associated_recurring_transactions
-        else
-          transaction.create_recurring
         end
       when 'destroy'
+        if transaction.frequency
+          transaction.delete_associated_recurring_transactions
+        end
         transaction.update!(delete_flag: true)
       end
     end
@@ -46,27 +50,39 @@ module TransactionsHelper
   end
 
   def aggregate_transactions
-    # get all categories with it's sum of transaction_amount
-    categories = Category.left_joins(:transactions)
-                       .select('categories.id, categories.name, categories.icon, categories.transaction_type,
-                                COALESCE(SUM(CASE WHEN transactions.delete_flag = false THEN transactions.transaction_amount ELSE 0 END), 0) as amount,
-                                COUNT(CASE WHEN transactions.delete_flag = false THEN transactions.id ELSE NULL END) as transactions_count')
-                       .group('categories.id, categories.transaction_type')
-                       .where(user_id: current_user.id, delete_flag: false)
-
-    categories = categories.where(id: params[:category_id]) if params[:category_id].present?
-    categories = categories.where(transaction_type: params[:type]) if params[:type].present?
+    # get all the categories
+    categories = Category.select(:id, :name, :transaction_type, :icon)
+                         .where(delete_flag: false, user_id: current_user.id)
+                         .tap do |c|
+                           c.where!(id: params[:category_id]) if params[:category_id].present?
+                           c.where!(transaction_type: params[:type]) if params[:type].present?
+                         end
+    # get all the transactions and filter them
+    filtered_transactions = Transaction.where(delete_flag: false)
     if params[:start_date].present? || params[:end_date].present?
-      categories = categories.having("COUNT(transactions.id) = 0 OR COUNT(transactions.transaction_date BETWEEN ? AND ?) >= 0", params[:start_date], params[:end_date])
+      filtered_transactions = filtered_transactions.where(transaction_date: params[:start_date]..params[:ends_date])
     end
 
-    formatted_data = categories.group_by(&:transaction_type).transform_values do |categories|
+    # join transactions,category and format each category
+    formatted_data = categories.map do |category|
+      category_transactions = filtered_transactions.where(category_id: category.id)
       {
-        total: categories.sum(&:amount),
-        categories: categories.map { |category| category.attributes.except('transaction_type') }
+        id: category.id,
+        name: category.name,
+        icon: category.icon,
+        transaction_type: category.transaction_type,
+        amount: category_transactions.sum('transaction_amount') || 0,
+        transactions_count: category_transactions.count || 0
       }
     end
-    formatted_data
+
+    formatted_data.group_by { |data| data[:transaction_type] }
+                  .transform_values do |categories|
+      {
+        total: categories.sum { |category| category[:amount] },
+        categories: categories.map { |category| category.except(:transaction_type) }
+      }
+    end
   end
 
   def format_errors(errors)
