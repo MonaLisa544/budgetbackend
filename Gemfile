@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
-ruby "3.2.3"
+ruby "3.3.1"
+gem 'concurrent-ruby', '1.3.4'
 
 # for photo upload
 gem 'base64'
@@ -10,6 +11,12 @@ gem "bootsnap", require: false
 
 #device
 gem 'devise'
+
+#mutex
+gem 'mutex_m'
+
+#bigdecimal
+gem 'bigdecimal'
 
 # jwt
 gem "devise-jwt"
