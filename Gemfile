@@ -9,6 +9,9 @@ gem 'base64'
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# password degit 
+gem 'bcrypt', '~> 3.1.7'
+
 #device
 gem 'devise'
 
@@ -23,6 +26,8 @@ gem "devise-jwt"
 
 # dotenv for sensitive information
 gem 'dotenv-rails', groups: [:development, :test]
+
+
 
 # seriliazer format json
 gem "fast_jsonapi"

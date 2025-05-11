@@ -16,6 +16,22 @@ Rails.application.routes.draw do
   namespace :api do
       namespace :v1 do
             resources :categories
+            resources :loans
+            resources :savings
+            resources :families do 
+              collection do 
+                post 'join', to: "families#join"
+                patch 'change_role', to: "families#change_role"
+              end
+            end
+            namespace :wallets do
+              get :me         # ①
+              get :family     # ②
+              put :update_me         # ③
+              put :update_family    # ④
+            end
+            resources :notifications
+            resources :budgets
             resources :transactions do
               collection do
                 get 'summary', to: "transactions#total_transactions"

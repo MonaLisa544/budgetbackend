@@ -7,6 +7,10 @@ class CreateTransactions < ActiveRecord::Migration[7.0]
       t.string :description, default: ''
       t.boolean :frequency, default: false
       t.boolean :delete_flag, default: false
+
+      t.references :source, polymorphic: true, index: true
+
+
       
       t.references :user, null: false, foreign_key: {to_table: :users}
       t.references :category, null: false, foreign_key: {to_table: :categories}
