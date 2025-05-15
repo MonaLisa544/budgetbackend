@@ -3,7 +3,7 @@ class Budget < ApplicationRecord
   belongs_to :category
 
   # Associations
-  has_many :transactions, dependent: :destroy
+  has_many :transactions 
 
   # Attributes
   attribute :delete_flag, :boolean, default: false

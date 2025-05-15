@@ -1,7 +1,7 @@
 class Wallet < ApplicationRecord
   has_many :transactions
-  has_many :savings
-  has_many :credits
+  has_many :goals
+  has_many :budgets
 
   belongs_to :owner, polymorphic: true
 

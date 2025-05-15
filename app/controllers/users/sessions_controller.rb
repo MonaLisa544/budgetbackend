@@ -20,7 +20,13 @@ class Users::SessionsController < Devise::SessionsController
     end
   end
   def respond_to_on_destroy
-    Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
-    render json: {:message => 'Logged out'}.to_json, status: 200
+    begin
+      Devise.sign_out_all_scopes ? sign_out : sign_out(resource_name)
+      render json: { message: 'Logged out' }, status: 200
+    rescue JWT::DecodeError => e
+      Rails.logger.error "JWT decode алдаа гарлаа: #{e.message}"
+      render json: { message: 'Already logged out or invalid token' }, status: 401
+    end
   end
+  
 end

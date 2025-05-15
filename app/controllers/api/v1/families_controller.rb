@@ -1,6 +1,17 @@
 class Api::V1::FamiliesController < ApplicationController
   before_action :authenticate_user!
 
+  def me
+    @family = current_user.family
+  
+    unless @family
+      return render json: { error: "Та ямар нэгэн гэр бүлд харьяалагдаагүй байна" }, status: :not_found
+    end
+  
+    render json: FamilySerializer.new(@family).serialized_json, status: :ok
+  end
+  
+
   # POST /api/v1/families
   def create
     @family = Family.new(family_params)
@@ -12,6 +23,20 @@ class Api::V1::FamiliesController < ApplicationController
       render json: { errors: @family.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+    # GET /api/v1/families/members
+    def members
+      family = current_user.family
+    
+      unless family
+        return render json: { error: "Та ямар нэгэн гэр бүлд харьяалагдаагүй байна" }, status: :not_found
+      end
+    
+      members = family.users
+    
+      render json: UserSerializer.new(members).serialized_json, status: :ok
+    end
+
   
 
   # POST /api/v1/families/join

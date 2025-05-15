@@ -2,59 +2,59 @@ class UsersController < ApplicationController
   before_action :authenticate_user!
 
   def update
-    user = current_user
-    if params[:user][:profile_photo]
-      begin
-        decoded_base64 = Base64.decode64(params[:user][:profile_photo].split(',').last)
-
-        mime_type = MIME::Types.type_for(decoded_base64).first.content_type
-        extension = MIME::Types.type_for(mime_type).first.extensions.first
-        filename = "#{SecureRandom.uuid}.#{extension}"
-
-        user.profile_photo.attach(
-          io: StringIO.new(decoded_base64),
-          filename: filename,
-          content_type: mime_type
-        )
-      rescue StandardError => e
-        render json: { errors: ["Failed to decode and attach image: #{e.message}"] }, status: 400 and return
-      end
+    @user = current_user
+  
+    if params[:profile_photo].present?
+      @user.profile_photo.attach(params[:profile_photo])
     end
-
-    if update_user(user, user_params)
-      render json: {
-        message: "Profile updated successfully",
-        user: user_response(user)
-      }, status: 200
+  
+    if @user.update(user_params)
+      render json: UserSerializer.new(@user).serialized_json
     else
-      render json: { errors: user.errors.full_messages }, status: 400
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
-
+  
   def show
-    user = current_user
-    attach_default_profile_photo(user) unless user.profile_photo.attached?
-    render json: user_response(user)
+    @user = current_user
+    attach_default_profile_photo(@user) unless @user.profile_photo.attached?
+  
+    render json: UserSerializer.new(@user).serialized_json
   end
 
+  def password_change
+    @user = current_user
+
+    unless @user.valid_password?(params[:current_password])
+      return render json: { error: 'Одоогийн нууц үг буруу байна' }, status: :unprocessable_entity
+    end
+
+    if params[:new_password].blank? || params[:new_password_confirmation].blank?
+      return render json: { error: 'Шинэ нууц үг бөглөөгүй байна' }, status: :unprocessable_entity
+    end
+
+    if params[:new_password] != params[:new_password_confirmation]
+      return render json: { error: 'Шинэ нууц үг таарахгүй байна' }, status: :unprocessable_entity
+    end
+
+    if @user.update(password: params[:new_password], password_confirmation: params[:new_password_confirmation])
+      render json: { message: 'Нууц үг амжилттай солигдлоо' }, status: :ok
+    else
+      render json: { error: @user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+  def update_player_id
+    if current_user.update(player_id: params[:player_id])
+      render json: { success: true }
+    else
+      render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+  
   private
 
   def user_params
-    params.require(:user).permit(:lastName, :firstName, :email, :password, :password_confirmation)
-  end
-
-  def update_user(user, user_params)
-    user.skip_password_validation = true
-    user.update(user_params)
-  end
-
-  def user_response(user)
-    {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      profile_photo: user.profile_photo.attached? ? url_for(user.profile_photo) : nil
-    }
+    params.require(:user).permit(:firstName, :lastName, :email, :password, :password_confirmation)
   end
 
   def attach_default_profile_photo(user)

@@ -12,14 +12,24 @@ Rails.application.routes.draw do
 
   get '/users/me', to: 'users#show'
   put '/users/edit', to: 'users#update'
+  post '/users/password_change', to: 'users#password_change'
+  patch 'users/player_id', to: 'users#update_player_id'
+  
 
   namespace :api do
       namespace :v1 do
             resources :categories
-            resources :loans
-            resources :savings
+            resources :goals
+            resources :budgets 
+            resources :notifications, only: [:index] do
+              member do
+                patch :mark_as_read
+              end
+            end
             resources :families do 
               collection do 
+                get 'me', do: "families#me"
+                get 'members', do: "families#members"
                 post 'join', to: "families#join"
                 patch 'change_role', to: "families#change_role"
               end
@@ -30,8 +40,6 @@ Rails.application.routes.draw do
               put :update_me         # ③
               put :update_family    # ④
             end
-            resources :notifications
-            resources :budgets
             resources :transactions do
               collection do
                 get 'summary', to: "transactions#total_transactions"

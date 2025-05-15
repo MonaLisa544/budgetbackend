@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
+ActiveRecord::Schema[7.0].define(version: 2026_02_27_213912) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -78,29 +78,27 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
     t.index ["family_name"], name: "index_families_on_family_name", unique: true
   end
 
+  create_table "goals", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "wallet_id", null: false
+    t.string "goal_name", limit: 50, null: false
+    t.decimal "target_amount", precision: 12, scale: 2, null: false
+    t.string "goal_type", null: false
+    t.string "status", default: "active"
+    t.decimal "paid_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "remaining_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.date "start_date", null: false
+    t.date "expected_date", null: false
+    t.integer "monthly_due_day", null: false
+    t.string "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["wallet_id"], name: "index_goals_on_wallet_id"
+  end
+
   create_table "jwt_denylist", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylist_on_jti"
-  end
-
-  create_table "loans", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "wallet_id", null: false
-    t.string "loan_name", limit: 50, null: false
-    t.string "loan_type", limit: 50
-    t.decimal "original_amount", precision: 15, scale: 2, null: false
-    t.decimal "interest_rate", precision: 5, scale: 2
-    t.decimal "monthly_payment_amount", precision: 15, scale: 2
-    t.integer "monthly_due_day"
-    t.date "start_date", null: false
-    t.date "due_date", null: false
-    t.string "status", default: "active", null: false
-    t.string "description"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.decimal "total_amount_due", precision: 15, scale: 2, default: "0.0", null: false
-    t.integer "paid_amount", default: 0, null: false
-    t.index ["wallet_id"], name: "index_loans_on_wallet_id"
   end
 
   create_table "notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -112,21 +110,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_notifications_on_user_id"
-  end
-
-  create_table "savings", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
-    t.bigint "wallet_id", null: false
-    t.string "saving_name", limit: 50, null: false
-    t.integer "target_amount", null: false
-    t.integer "paid_amount", default: 0, null: false
-    t.date "start_date", null: false
-    t.date "expected_date", null: false
-    t.string "status", default: "active", null: false
-    t.string "description"
-    t.boolean "delete_flag", default: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["wallet_id"], name: "index_savings_on_wallet_id"
   end
 
   create_table "transactions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -141,10 +124,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "wallet_id"
-    t.string "source_type"
-    t.bigint "source_id"
+    t.bigint "goal_id"
     t.index ["category_id"], name: "index_transactions_on_category_id"
-    t.index ["source_type", "source_id"], name: "index_transactions_on_source"
+    t.index ["goal_id"], name: "index_transactions_on_goal_id"
     t.index ["user_id"], name: "index_transactions_on_user_id"
     t.index ["wallet_id"], name: "index_transactions_on_wallet_id"
   end
@@ -161,6 +143,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
     t.datetime "remember_created_at"
     t.bigint "family_id"
     t.integer "role", default: 0, null: false
+    t.string "player_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["family_id"], name: "index_users_on_family_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -181,10 +164,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213909) do
   add_foreign_key "budgets", "categories"
   add_foreign_key "budgets", "wallets"
   add_foreign_key "categories", "users"
-  add_foreign_key "loans", "wallets"
+  add_foreign_key "goals", "wallets"
   add_foreign_key "notifications", "users"
-  add_foreign_key "savings", "wallets"
   add_foreign_key "transactions", "categories"
+  add_foreign_key "transactions", "goals"
   add_foreign_key "transactions", "users"
   add_foreign_key "transactions", "wallets"
   add_foreign_key "users", "families"

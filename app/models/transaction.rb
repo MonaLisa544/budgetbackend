@@ -4,9 +4,8 @@ class Transaction < ApplicationRecord
     belongs_to :user
     belongs_to :category
     belongs_to :wallet
-  
-    # Polymorphic холбоо (Saving, Credit гэх мэт зүйлсийн төлбөрийг холбох)
-    belongs_to :source, polymorphic: true, optional: true
+
+    belongs_to :goal, optional: true 
   
     validates :transaction_name, presence: true, length: { maximum: 20 }
     validates :transaction_amount, presence: true, numericality: { greater_than: 0 }, length: { maximum: 10 }
@@ -29,10 +28,12 @@ class Transaction < ApplicationRecord
     after_create  :update_related_budget_used_amount
     after_update  :update_related_budget_used_amount
     after_destroy :update_related_budget_used_amount
+    
 
-    after_create  :update_loan_paid_amount
-    after_update  :update_loan_paid_amount
-    after_destroy :update_loan_paid_amount
+    after_create  :update_goal_paid_amount
+after_update  :update_goal_paid_amount
+after_destroy :update_goal_paid_amount
+
 
     
   
@@ -104,20 +105,23 @@ class Transaction < ApplicationRecord
       budget.update(used_amount: total_used)
     end
 
-    def update_loan_paid_amount
-      return unless source_type == "Loan" && source_id.present?
-    
-      loan = source
-      return unless loan.is_a?(Loan)
-    
-      total_paid = Transaction.where(
-        source_type: "Loan",
-        source_id: loan.id,
-        delete_flag: false
-      ).sum(:transaction_amount)
-    
-      loan.update_column(:paid_amount, total_paid)
-    end
+
+
+def update_goal_paid_amount
+  return unless goal_id.present?
+
+  goal = Goal.find_by(id: goal_id)
+  return unless goal
+
+  total_paid = Transaction.where(goal_id: goal.id, delete_flag: false).sum(:transaction_amount)
+
+  goal.update_columns(
+    paid_amount: total_paid,
+    remaining_amount: [goal.target_amount - total_paid, 0].max
+  )
+end
+
+
 
   end
   

@@ -11,7 +11,7 @@ class BudgetSerializer
              :description
 
   belongs_to :wallet
-  belongs_to :category
+  
 
   # Status харуулах (e.g., "Active", "Completed")
   attribute :status_label do |budget|
@@ -25,5 +25,17 @@ class BudgetSerializer
 
   attribute :owner_id do |budget|
     budget.wallet.owner_id
+  end
+
+  attribute :category_name do |budget|
+    budget.category&.category_name
+  end
+
+  attribute :category_icon do |budget|
+    budget.category&.icon
+  end
+
+  attribute :category_icon_color do |budget|
+    budget.category&.icon_color
   end
 end

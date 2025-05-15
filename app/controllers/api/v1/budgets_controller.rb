@@ -4,27 +4,42 @@ class Api::V1::BudgetsController < ApplicationController
 
   # GET /api/v1/budgets
   def index
-    if current_user.role == 1 && current_user.family_id.present?
+    Rails.logger.info "Current User: #{current_user.inspect}"
+
+    if current_user.family_id.present?
       wallet_ids = Wallet.where(owner_type: ['User', 'Family'], owner_id: [current_user.id, current_user.family_id]).pluck(:id)
     else
       wallet_ids = [current_user.wallet.id]
     end
 
     budgets = Budget.where(wallet_id: wallet_ids)
-    render json: BudgetSerializer.new(budgets).serializable_hash.to_json
+
+    if params[:year].present? && params[:month].present?
+      year = params[:year].to_i
+      month = params[:month].to_i
+
+      start_date = Date.new(year, month, 1)
+      end_date = start_date.end_of_month
+
+      budgets = budgets.where(start_date: start_date..end_date)
+    end
+
+    budgets = budgets.order(start_date: :desc)
+
+    render json: BudgetSerializer.new(budgets).serialized_json
   end
 
   # GET /api/v1/budgets/:id
   def show
-    render json: BudgetSerializer.new(@budget).serializable_hash.to_json
+    render json: BudgetSerializer.new(@budget).serialized_json
   end
 
   # POST /api/v1/budgets
   def create
     budget_data = budget_params.except(:type)
 
-     Rails.logger.info "Current User Role: #{current_user.role} (User ID: #{current_user.id})"
-  
+    Rails.logger.info "Current User Role: #{current_user.role} (User ID: #{current_user.id})"
+
     wallet =
       if params[:budget][:type] == "family"
         if current_user.family_id && current_user.admin?
@@ -35,13 +50,13 @@ class Api::V1::BudgetsController < ApplicationController
       else
         current_user.wallet
       end
-  
+
     return render json: { error: "Wallet not found" }, status: :not_found unless wallet
-  
+
     budget = Budget.new(budget_data.merge(wallet_id: wallet.id))
-  
+
     if budget.save
-      render json: BudgetSerializer.new(budget).serializable_hash.to_json, status: :created
+      render json: BudgetSerializer.new(budget).serialized_json, status: :created
     else
       render json: { errors: budget.errors.full_messages }, status: :unprocessable_entity
     end
@@ -54,7 +69,7 @@ class Api::V1::BudgetsController < ApplicationController
     end
 
     if @budget.update(budget_params)
-      render json: BudgetSerializer.new(@budget).serializable_hash.to_json
+      render json: BudgetSerializer.new(@budget).serialized_json
     else
       render json: { errors: @budget.errors.full_messages }, status: :unprocessable_entity
     end
@@ -132,4 +147,5 @@ class Api::V1::BudgetsController < ApplicationController
       false
     end
   end
-end
+
+end  # <-- Энэ нэг л төгсгөлийн `end`

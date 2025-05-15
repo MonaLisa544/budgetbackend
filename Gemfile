@@ -3,9 +3,6 @@ source "https://rubygems.org"
 ruby "3.3.1"
 gem 'concurrent-ruby', '1.3.4'
 
-# for photo upload
-gem 'base64'
-
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
@@ -26,8 +23,6 @@ gem "devise-jwt"
 
 # dotenv for sensitive information
 gem 'dotenv-rails', groups: [:development, :test]
-
-
 
 # seriliazer format json
 gem "fast_jsonapi"
@@ -58,6 +53,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # For Pagination
 gem 'will_paginate', '~> 3.3'
+
+#push notification
+gem 'httparty'
 
 # For repeated transactions (frequency)
 gem 'whenever', require: false

@@ -12,6 +12,7 @@ module JwtHelper
       decoded = JWT.decode(token, SECRET_KEY).first
       HashWithIndifferentAccess.new decoded
     rescue
+       Rails.logger.error "JWT decode failed: #{e.message}"
       nil
     end
   
