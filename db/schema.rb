@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_02_27_213912) do
+ActiveRecord::Schema[7.0].define(version: 2026_02_27_213915) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -42,17 +42,13 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213912) do
   create_table "budgets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "budget_name", null: false
     t.integer "amount", null: false
-    t.date "start_date", null: false
-    t.date "due_date", null: false
-    t.date "pay_due_date"
-    t.string "status", default: "active", null: false
+    t.integer "pay_due_date"
     t.text "description"
     t.boolean "delete_flag", default: false
     t.bigint "category_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "wallet_id", null: false
-    t.integer "used_amount", default: 0, null: false
     t.index ["category_id"], name: "index_budgets_on_category_id"
     t.index ["wallet_id"], name: "index_budgets_on_wallet_id"
   end
@@ -99,6 +95,17 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213912) do
     t.string "jti", null: false
     t.datetime "exp", null: false
     t.index ["jti"], name: "index_jwt_denylist_on_jti"
+  end
+
+  create_table "monthly_budgets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "budget_id", null: false
+    t.string "month", null: false
+    t.decimal "amount", precision: 10, default: "0"
+    t.decimal "used_amount", precision: 10, default: "0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["budget_id", "month"], name: "index_monthly_budgets_on_budget_id_and_month", unique: true
+    t.index ["budget_id"], name: "index_monthly_budgets_on_budget_id"
   end
 
   create_table "notifications", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -165,6 +172,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213912) do
   add_foreign_key "budgets", "wallets"
   add_foreign_key "categories", "users"
   add_foreign_key "goals", "wallets"
+  add_foreign_key "monthly_budgets", "budgets"
   add_foreign_key "notifications", "users"
   add_foreign_key "transactions", "categories"
   add_foreign_key "transactions", "goals"

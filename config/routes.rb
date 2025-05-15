@@ -21,6 +21,7 @@ Rails.application.routes.draw do
             resources :categories
             resources :goals
             resources :budgets 
+            resources :monthly_budgets, only: [:index, :show, :update]
             resources :notifications, only: [:index] do
               member do
                 patch :mark_as_read
@@ -35,10 +36,10 @@ Rails.application.routes.draw do
               end
             end
             namespace :wallets do
-              get :me         # ①
-              get :family     # ②
-              put :update_me         # ③
-              put :update_family    # ④
+              get :me         
+              get :family     
+              put :update_me         
+              put :update_family    
             end
             resources :transactions do
               collection do

@@ -12,6 +12,10 @@ class Goal < ApplicationRecord
     validates :monthly_due_day, presence: true, numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 31 }
     validates :description, length: { maximum: 255 }, allow_blank: true
     validates :status, inclusion: { in: statuses.keys }
+    
+    attribute :delete_flag, :boolean, default: false
+    attribute :paid_amount,
+    attribute :monthly_paid_amount,
   
     # ✅ ШИНЭ method 1
     def months_left
@@ -20,7 +24,7 @@ class Goal < ApplicationRecord
     end
   
     # ✅ ШИНЭ method 2
-    def monthly_saving
+    def monthly_paid_amount
       return 0 if target_amount.blank? || months_left == 0
       (target_amount / months_left.to_f).round(2)
     end

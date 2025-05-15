@@ -10,17 +10,8 @@ class GoalSerializer
                :remaining_amount,
                :start_date,
                :expected_date,
-               :description,
-               :created_at,
-               :updated_at
-  
-    attribute :progress_percentage do |goal|
-      if goal.target_amount && goal.target_amount > 0
-        ((goal.paid_amount.to_f / goal.target_amount) * 100).round(2)
-      else
-        0.0
-      end
-    end
+               :monthly_due_day,
+               :description
   
     attribute :months_left do |goal|
       if goal.start_date && goal.expected_date
@@ -30,11 +21,19 @@ class GoalSerializer
         0
       end
     end
+    attribute :wallet_type do |budget|
+      case budget.wallet.owner_type
+      when "User"
+        "private"
+      when "Family"
+        "family"
+      else
+        "unknown"
+      end
+    end
   
     belongs_to :wallet
 
-    attribute :owner_type do |budget|
-        budget.wallet.owner_type
-      end 
+    
   end
   

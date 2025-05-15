@@ -7,7 +7,7 @@ class Family < ApplicationRecord
 
     validates :family_name, presence: true, uniqueness: true
     validates :password, presence: true, length: { minimum: 4 }, on: :create
-    attribute :delete_flag
+    attribute :delete_flag, :boolean, default: false
 
 
     after_create :create_wallet_for_family
