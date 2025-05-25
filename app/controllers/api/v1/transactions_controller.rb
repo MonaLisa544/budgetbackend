@@ -16,7 +16,7 @@ class Api::V1::TransactionsController < ApplicationController
   end
 
   def create
-    wallet_type = params[:transaction][:wallet_type] # гаднаас ирж байгаа параметр
+    wallet_type = params[:transaction][:wallet_type]
     transaction_data = transaction_params
   
     wallet = case wallet_type
@@ -34,22 +34,35 @@ class Api::V1::TransactionsController < ApplicationController
     @transaction = current_user.transactions.build(transaction_data.merge(wallet_id: wallet.id))
   
     if @transaction.save
-      # 🔥 Transaction амжилттай хадгалагдлаа, одоо Budget update хийнэ
-      budget = Budget.where(
-        category_id: @transaction.category_id,
-        wallet_id: @transaction.wallet_id
-      ).where("start_date <= ? AND due_date >= ?", @transaction.transaction_date, @transaction.transaction_date).first
-  
-      if budget.present?
-        budget.used_amount += @transaction.transaction_amount
-        budget.save!
+      # --- BALANCE UPDATE LOGIC START ---
+      if @transaction.category.transaction_type == "income"
+        wallet.balance += @transaction.transaction_amount
+      elsif @transaction.category.transaction_type == "expense"
+        wallet.balance -= @transaction.transaction_amount
       end
+      wallet.save!
+      # --- BALANCE UPDATE LOGIC END ---
+  
+     # --- MONTHLY BUDGET UPDATE ---
+budget_month = @transaction.transaction_date.strftime("%Y-%m")
+# Шинэчлэл: wallet_id болон category_id-гаар тааруулж budget ол
+budget = Budget.find_by(wallet_id: wallet.id, category_id: @transaction.category_id, delete_flag: false)
+if budget.present?
+  monthly_budget = MonthlyBudget.find_by(budget_id: budget.id, month: budget_month)
+  if monthly_budget.present?
+    monthly_budget.used_amount += @transaction.transaction_amount
+    monthly_budget.save!
+  end
+end
+# --- END MONTHLY BUDGET UPDATE ---
   
       render json: TransactionSerializer.new(@transaction).serialized_json, status: :created
     else
       render json: { errors: format_errors(@transaction.errors) }, status: 422
     end
   end
+  
+  
   
   def update
     return render json: { error: "Энэ transaction-г өөрчлөх эрхгүй байна" }, status: :forbidden unless authorized_to_edit?(@transaction)

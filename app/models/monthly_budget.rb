@@ -5,6 +5,8 @@ class MonthlyBudget < ApplicationRecord
   validates :amount, numericality: { greater_than_or_equal_to: 0 }
   validates :used_amount, numericality: { greater_than_or_equal_to: 0 }
 
+  attribute :delete_flag, :boolean, default: false
+
   # Үлдэгдэл тооцоолол
   def remaining_amount
     amount.to_f - used_amount.to_f

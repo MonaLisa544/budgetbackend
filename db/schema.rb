@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_02_27_213915) do
+ActiveRecord::Schema[7.0].define(version: 2026_02_27_213921) do
   create_table "active_storage_attachments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -74,14 +74,25 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213915) do
     t.index ["family_name"], name: "index_families_on_family_name", unique: true
   end
 
+  create_table "goal_monthly_statuses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "goal_id", null: false
+    t.string "month", null: false
+    t.string "status", null: false
+    t.decimal "paid_amount", precision: 15, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["goal_id", "month"], name: "index_goal_monthly_statuses_on_goal_id_and_month", unique: true
+    t.index ["goal_id"], name: "index_goal_monthly_statuses_on_goal_id"
+  end
+
   create_table "goals", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "wallet_id", null: false
     t.string "goal_name", limit: 50, null: false
     t.decimal "target_amount", precision: 12, scale: 2, null: false
     t.string "goal_type", null: false
     t.string "status", default: "active"
-    t.decimal "paid_amount", precision: 12, scale: 2, default: "0.0", null: false
-    t.decimal "remaining_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "saved_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "monthly_due_amount", precision: 12, scale: 2, default: "0.0", null: false
     t.date "start_date", null: false
     t.date "expected_date", null: false
     t.integer "monthly_due_day", null: false
@@ -171,11 +182,12 @@ ActiveRecord::Schema[7.0].define(version: 2026_02_27_213915) do
   add_foreign_key "budgets", "categories"
   add_foreign_key "budgets", "wallets"
   add_foreign_key "categories", "users"
+  add_foreign_key "goal_monthly_statuses", "goals", on_delete: :cascade
   add_foreign_key "goals", "wallets"
   add_foreign_key "monthly_budgets", "budgets"
   add_foreign_key "notifications", "users"
   add_foreign_key "transactions", "categories"
-  add_foreign_key "transactions", "goals"
+  add_foreign_key "transactions", "goals", on_delete: :nullify
   add_foreign_key "transactions", "users"
   add_foreign_key "transactions", "wallets"
   add_foreign_key "users", "families"

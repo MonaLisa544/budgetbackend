@@ -6,6 +6,7 @@ class Transaction < ApplicationRecord
     belongs_to :wallet
 
     belongs_to :goal, optional: true 
+    
   
     validates :transaction_name, presence: true, length: { maximum: 20 }
     validates :transaction_amount, presence: true, numericality: { greater_than: 0 }, length: { maximum: 10 }
@@ -33,6 +34,8 @@ class Transaction < ApplicationRecord
     after_create  :update_goal_paid_amount
 after_update  :update_goal_paid_amount
 after_destroy :update_goal_paid_amount
+
+after_save :update_goal_progress, if: :goal_id?
 
 
     
@@ -86,23 +89,27 @@ after_destroy :update_goal_paid_amount
 
     def update_related_budget_used_amount
       return unless category_id && wallet_id && transaction_date
-  
-      # Гүйлгээний огноонд таарах тухайн wallet ба category-тай төсөв хайна
-      budget = Budget.where(
-        category_id: category_id,
-        wallet_id: wallet_id
-      ).where("start_date <= ? AND due_date >= ?", transaction_date, transaction_date).first
-  
-      return unless budget
-  
+    
+      # 1. Category-аас budget_id-г олно
+      category = Category.find_by(id: category_id)
+      return unless category && category.budget_id
+    
+      # 2. Гүйлгээний огнооны сар (2025-05 гэх мэт) олно
+      budget_month = transaction_date.strftime("%Y-%m")
+    
+      # 3. MonthlyBudget-ээ олно
+      monthly_budget = MonthlyBudget.find_by(budget_id: category.budget_id, month: budget_month)
+      return unless monthly_budget
+    
+      # 4. Тухайн сар, budget_id-д харгалзах бүх гүйлгээний нийлбэр
       total_used = Transaction.where(
         category_id: category_id,
         wallet_id: wallet_id,
         delete_flag: false
-      ).where("transaction_date BETWEEN ? AND ?", budget.start_date, budget.due_date)
+      ).where("DATE_FORMAT(transaction_date, '%Y-%m') = ?", budget_month)
        .sum(:transaction_amount)
-  
-      budget.update(used_amount: total_used)
+    
+      monthly_budget.update(used_amount: total_used)
     end
 
 
@@ -119,6 +126,14 @@ def update_goal_paid_amount
     paid_amount: total_paid,
     remaining_amount: [goal.target_amount - total_paid, 0].max
   )
+end
+
+
+def update_goal_progress
+  year = transaction_date.year
+  month = transaction_date.month
+
+  GoalProgressService.check_monthly_progress(goal, year, month)
 end
 
 

@@ -19,7 +19,11 @@ Rails.application.routes.draw do
   namespace :api do
       namespace :v1 do
             resources :categories
-            resources :goals
+            resources :goals do
+              member do
+                get :monthly_statuses
+              end
+            end
             resources :budgets 
             resources :monthly_budgets, only: [:index, :show, :update]
             resources :notifications, only: [:index] do
