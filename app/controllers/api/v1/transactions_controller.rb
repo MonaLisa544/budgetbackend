@@ -155,9 +155,10 @@ end
   end
 
   def transaction_params
-    params.require(:transaction).permit(:transaction_name, :transaction_amount, :transaction_date, :description, :category_id)
+    params.require(:transaction).permit(
+      :transaction_name, :transaction_amount, :transaction_date, :description, :category_id
+    )
   end
-
   def set_transaction
     @transaction = Transaction.find_by(id: params[:id], user_id: current_user.id, delete_flag: false)
     render json: { error: 'Transaction not found' } unless @transaction
