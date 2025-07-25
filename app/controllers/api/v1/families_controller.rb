@@ -2,13 +2,13 @@ class Api::V1::FamiliesController < ApplicationController
   before_action :authenticate_user!
 
   def me
-    @family = current_user.family
+    family = current_user.family
   
-    unless @family
-      return render json: { error: "Та ямар нэгэн гэр бүлд харьяалагдаагүй байна" }, status: :not_found
+    if family.nil?
+      render json: { error: "Та ямар нэгэн гэр бүлд харьяалагдаагүй байна" }, status: :not_found
+    else
+      render json: FamilySerializer.new(family).serialized_json, status: :ok
     end
-  
-    render json: FamilySerializer.new(@family).serialized_json, status: :ok
   end
   
 
